@@ -1,0 +1,17 @@
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+Require all granted
+
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L,NE]
+
+<FilesMatch "(^\.|\.(sql|json|zip|gz|bak|log|txt|md)$|^(tenant|security|auth|activity|ai_provider|backup_lib|mail_credentials|document_text|maintenance_mjop|instruction_ui|preflight)\.php$)">
+    Require all denied
+</FilesMatch>
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "same-origin"
+    Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
