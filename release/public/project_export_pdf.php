@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/tenant.php';
 require_once __DIR__.'/auth.php';
 require_once __DIR__.'/maintenance_mjop.php';
+require_once __DIR__.'/lookup_catalogs.php';
 requireLogin();
 $id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);
 if(!$id){http_response_code(400);exit('Ongeldig project.');}
@@ -12,6 +13,7 @@ $project=$query('SELECT * FROM VveGuiProjecten WHERE ProjectID=?',[$id])[0]??nul
 if(!$project){http_response_code(404);exit('Project niet gevonden.');}
 $mjop=trim((string)($project['MJOPReferentie']??''))!==''?maintenanceMjopFind($db,trim((string)$project['MJOPReferentie'])):null;
 $lookup=[];if(is_file(tenantPrivateFile('lookups.php'))){$loaded=include tenantPrivateFile('lookups.php');if(is_array($loaded))$lookup=$loaded;}
+$lookup=catalogLookups($db,$lookup);
 $stabuCode=trim((string)($project['StabuCode']??''));
 $stabuLabel=$stabuCode!==''?(string)(($lookup['maintenance_plans']['StabuCode'][$stabuCode]??'')):'';
 $checklist=$query('SELECT Fase,Criterium,Datum,Compleet FROM ProjectChecklist WHERE ProjectID=? ORDER BY ChecklistID',[$id]);

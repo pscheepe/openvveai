@@ -2,12 +2,21 @@
 declare(strict_types=1);
 require_once __DIR__.'/tenant.php';
 
+function aiProviderModelId(string $model): string {
+    $model=trim($model);
+    // OpenAI model IDs are case-sensitive. Correct the common display-name spelling
+    // without changing custom or fine-tuned model IDs.
+    return preg_match('/^gpt-6-(?:astra|sol|luna)$/iD',$model)?strtolower($model):$model;
+}
+
 function aiProviderConfig(): array {
     $defaults=['provider'=>'none','model'=>'','api_key'=>'','endpoint'=>'','include_database'=>false,'include_email'=>false,'timeout'=>25];
     $path=tenantPrivateFile('ai_config.php');
     if(!is_file($path))return $defaults;
     $loaded=require $path;
-    return is_array($loaded)?array_replace($defaults,$loaded):$defaults;
+    $config=is_array($loaded)?array_replace($defaults,$loaded):$defaults;
+    if(mb_strtolower(trim((string)$config['provider']))==='openai')$config['model']=aiProviderModelId((string)$config['model']);
+    return $config;
 }
 
 function aiProviderStatus(): array {
@@ -32,26 +41,47 @@ function aiProviderRequest(string $url,array $headers,array $payload,int $timeou
     return $decoded;
 }
 
-function aiProviderSourceText(array $sources,bool $includeDatabase,bool $includeEmail,bool $broad=false): string {
+function aiProviderIsEmailSource(array $source): bool {
+    return ($source['kind']??'')==='email'||(($source['kind']??'')==='document'&&(bool)preg_match('/\.(?:eml|msg)$/iu',(string)($source['filename']??'')));
+}
+
+function aiProviderSourceText(array $sources,bool $includeDatabase,bool $includeEmail,bool $broad=false,bool $financial=false): string {
     $blocks=[];$included=0;
-    $limit=$broad?36:12;$snippetLimit=$broad?3600:1600;
+    $limit=$broad?36:($financial?24:12);$snippetLimit=$broad?3600:($financial?5000:1600);
     foreach($sources as $index=>$source){
-        if(($source['kind']??'')==='email'&&!$includeEmail)continue;
+        if(aiProviderIsEmailSource($source)&&!$includeEmail)continue;
         if(($source['kind']??'')==='database'&&!$includeDatabase)continue;
         $included++;if($included>$limit)break;$number=(int)$index+1;
         $date=trim((string)($source['timeline_date']??$source['date']??''));
-        $kind=match((string)($source['kind']??'')){'database'=>'database','email'=>'e-mail',default=>'document'};
+        $kind=aiProviderIsEmailSource($source)?'e-mail':match((string)($source['kind']??'')){'database'=>'database',default=>'document'};
         $blocks[]='[Bron '.$number.']'."\n".'Titel: '.mb_substr((string)($source['title']??''),0,240)."\n".'Datum: '.($date!==''?$date:'onbekend')."\n".'Type: '.$kind."\n".'Locatie: '.mb_substr((string)($source['folder']??''),0,300)."\n".'Passage: '.mb_substr((string)($source['snippet']??''),0,$snippetLimit);
     }
     return implode("\n\n",$blocks);
 }
 
-function aiProviderText(array $config,string $instructions,string $input,int $maxTokens=700): array {
+function aiProviderOpenAiPayload(string $model,string $instructions,string $input,int $maxTokens,string $purpose): array {
+    $payload=['model'=>$model,'store'=>false,'instructions'=>$instructions,'input'=>$input,'max_output_tokens'=>$maxTokens];
+    if(preg_match('/^gpt-6-(?:astra|sol|luna)(?:$|-)/',$model)){
+        // Reasoning tokens count toward this limit, even when no answer text is produced.
+        $payload['reasoning']=['effort'=>match($purpose){'test','classify'=>'none','select'=>'low',default=>'medium'}];
+        $payload['max_output_tokens']=match($purpose){
+            'test'=>128,
+            'classify'=>512,
+            'select'=>max(4096,$maxTokens),
+            default=>max($maxTokens>=3000?8192:4096,$maxTokens),
+        };
+        if($model==='gpt-6-astra'&&$payload['reasoning']['effort']==='none')$payload['reasoning']['effort']='low';
+    }
+    return $payload;
+}
+
+function aiProviderText(array $config,string $instructions,string $input,int $maxTokens=700,string $purpose='answer'): array {
     $status=aiProviderStatus();
     if(!$status['configured'])throw new RuntimeException('Er is geen AI-provider ingesteld.');
     $provider=$status['provider'];$timeout=(int)$config['timeout'];
     if($provider==='openai'){
-        $response=aiProviderRequest('https://api.openai.com/v1/responses',['Content-Type: application/json','Authorization: Bearer '.(string)$config['api_key']],['model'=>(string)$config['model'],'store'=>false,'instructions'=>$instructions,'input'=>$input,'max_output_tokens'=>$maxTokens],$timeout);
+        $response=aiProviderRequest('https://api.openai.com/v1/responses',['Content-Type: application/json','Authorization: Bearer '.(string)$config['api_key']],aiProviderOpenAiPayload((string)$config['model'],$instructions,$input,$maxTokens,$purpose),$timeout);
+        if(($response['status']??'')==='incomplete'&&($response['incomplete_details']['reason']??'')==='max_output_tokens')throw new RuntimeException('Het AI-model bereikte de uitvoerlimiet voordat het antwoord af was.');
         $text=trim((string)($response['output_text']??''));
         if($text==='')foreach(($response['output']??[]) as $item)foreach(($item['content']??[]) as $content)if(($content['type']??'')==='output_text')$text.=($text!==''?"\n":'').trim((string)($content['text']??''));
     }elseif($provider==='ollama'){
@@ -65,7 +95,7 @@ function aiProviderText(array $config,string $instructions,string $input,int $ma
 function aiProviderClassify(string $question): ?array {
     $config=aiProviderConfig();if(!aiProviderStatus()['configured'])return null;
     $instructions='Classificeer uitsluitend de gebruikersvraag. Antwoord exact met één JSON-object zonder markdown: {"archive":true|false,"scope":"none|targeted|broad","search_query":"...","search_terms":["..."]}. archive is alleen true als informatie uit het VvE-archief, documenten, database of e-mail nodig is. Gebruik broad voor alles, chronologie, geschiedenis, correspondentie, onderzoek, rapport of een compleet overzicht; anders targeted. Maak search_query kort. Geef in search_terms maximaal twaalf onderscheidende namen, projectnummers, leveranciers, synoniemen en onderwerpvarianten die daadwerkelijk kunnen helpen bij het terugvinden van het dossier. Voor algemene kennis of rekenen: archive false, scope none.';
-    $result=aiProviderText($config,$instructions,$question,180);$raw=trim($result['text']);
+    $result=aiProviderText($config,$instructions,$question,180,'classify');$raw=trim($result['text']);
     $raw=preg_replace('/^```(?:json)?\s*|\s*```$/iu','',$raw)??$raw;$data=json_decode($raw,true);
     if(!is_array($data)||!array_key_exists('archive',$data))throw new RuntimeException('De vraaganalyse gaf geen bruikbare classificatie.');
     $scope=in_array(($data['scope']??''),['none','targeted','broad'],true)?$data['scope']:(!empty($data['archive'])?'targeted':'none');
@@ -113,7 +143,7 @@ function aiProviderSelectRelevantSources(string $question,array $sources,int $li
     if(!aiProviderStatus()['configured']||!$sources)return $sources;
     $candidates=[];$sourceMap=[];
     foreach($sources as $source){
-        if(($source['kind']??'')==='email'&&empty($config['include_email']))continue;
+        if(aiProviderIsEmailSource($source)&&empty($config['include_email']))continue;
         if(($source['kind']??'')==='database'&&empty($config['include_database']))continue;
         $number=count($sourceMap)+1;$sourceMap[$number]=$source;
         $phase=aiProviderSourcePhase($source)??'overig';$quality=trim((string)($source['content_quality']??''));
@@ -123,7 +153,7 @@ function aiProviderSelectRelevantSources(string $question,array $sources,int $li
     if(!$sourceMap)return $sources;
     $instructions='U selecteert bronnen voor een inhoudelijk VvE-dossier. Beoordeel de betekenis en het projectverband, niet alleen overeenkomstige woorden. Een bron is relevant als zij rechtstreeks over het gevraagde onderwerp gaat, of aantoonbaar een fase, besluit, offerte, opdracht, financiering, planning, uitvoering, correspondentie of conflict binnen hetzelfde dossier beschrijft. Zorg bij een chronologisch of volledig dossier waar mogelijk voor dekking van besluitvorming, offerte/opdracht, uitvoering, oplevering/nazorg, actuele toestand en primaire technische bronnen. Geef voorrang aan formele besluiten, notulen, opdrachten, overeenkomsten, facturen, planningen en inhoudelijke correspondentie. Een inhoudsarme factuur, opdracht of technisch rapport mag op grond van titel en dossierlocatie worden behouden, maar trek daaruit geen details die niet in de passage staan. Verwerp automatische antwoorden en stukken die alleen algemene woorden delen, bijvoorbeeld een ander vervangingsproject, andere deuren, ventilatoren, gevelinstallaties of algemeen onderhoud. Geef 90-100 voor rechtstreeks beslissende stukken, 80-89 voor duidelijke dossiercontext, 72-79 voor nuttige maar indirecte context en lager dan 72 voor onvoldoende verband. Neem uitsluitend bronnen met minimaal 72 punten op. date is alleen een expliciet in titel of passage aangetroffen gebeurtenis- of brondatum in formaat YYYY-MM-DD; gebruik null als die niet betrouwbaar is vast te stellen en gebruik nooit de upload- of registratiedatum als gebeurtenisdatum. Antwoord uitsluitend met geldig JSON zonder markdown: {"selected":[{"source":1,"score":100,"date":"2025-08-25","reason":"kort"}]}. Gebruik alleen bestaande kandidaatnummers, maximaal '.$limit.', aflopend op relevantie. Selecteer niets wanneer geen kandidaat inhoudelijk past.';
     $input="Gebruikersvraag: {$question}\n\n".implode("\n\n",$candidates);
-    $result=aiProviderText($config,$instructions,$input,2200);
+    $result=aiProviderText($config,$instructions,$input,2200,'select');
     $raw=preg_replace('/^```(?:json)?\s*|\s*```$/iu','',trim($result['text']))??trim($result['text']);
     $decoded=json_decode($raw,true);
     if(!is_array($decoded)||!isset($decoded['selected'])||!is_array($decoded['selected']))throw new RuntimeException('De inhoudelijke bronselectie gaf geen bruikbaar resultaat.');
@@ -166,11 +196,14 @@ function aiProviderAnswer(string $question,array $sources,string $intent='zoeken
     if(!$status['configured'])return null;
     $broad=in_array($intent,['chronologisch','dossier'],true);
     if($broad)$config['timeout']=max(35,(int)$config['timeout']);
-    $sourceText=aiProviderSourceText($sources,(bool)$config['include_database'],(bool)$config['include_email'],$broad);
+    if($intent==='financieel')$config['timeout']=max(55,(int)$config['timeout']);
+    $sourceText=aiProviderSourceText($sources,(bool)$config['include_database'],(bool)$config['include_email'],$broad,$intent==='financieel');
     if($sourceText==='')return null;
-    $instructions=$broad
+    $instructions=$intent==='financieel'
+        ? 'U bent een uitsluitend lezende VvE-archiefassistent. Gebruik uitsluitend de aangeleverde bronregels en lees de kolomkoppen. Crediteuren- of factuurregels tonen een verschuldigd bedrag; de kolom Status=Betaald of een Betaaldatum is een aanwijzing, maar controleer voor daadwerkelijk betaalde bedragen waar mogelijk de gekoppelde Betalingen-regel via Factuur_ID. In Betalingen is Bedrag het betaalde bedrag en Datum de betaaldatum. Een betaal- of factuurdatum na de peildatum is toekomstig en mag nooit als reeds betaalde uitgave worden meegeteld, ook niet als de factuur Status=Betaald heeft. Grootboekregels zijn boekingen, geen zelfstandig bewijs van betaling; tel geen debet- en creditregels als losse kosten bij elkaar. Offertebedragen en MJOP-begrotingen zijn geen werkelijke uitgaven. Vermeld het onderscheid tussen betaald, gefactureerd, openstaand en begroot. Tel bedragen alleen op bij gelijke betekenis en een duidelijke periode; gebruik datums uit de relevante kolom. Als gegevens ontbreken, zeg dat expliciet. Onderbouw bedragen en conclusies met de exacte verwijzingen [Bron 1] enzovoort. Verzin niets en geef geen financieel eindoordeel.'
+        : ($broad
         ? 'U bent een uitsluitend lezende onderzoeksassistent voor een VvE-archief. Maak op basis van uitsluitend de aangeleverde bronnen een inhoudelijk dossier, niet een opsomming van zoektreffers. Selecteer alleen werkelijk relevante passages; een toevallige woordovereenkomst is onvoldoende. Combineer documenten en e-mail tot gebeurtenissen en voeg kennelijke duplicaten samen. Zet gedateerde gebeurtenissen strikt van oud naar nieuw; controleer ook binnen iedere alinea de datumvolgorde. Geef een expliciete datum in titel of bestandsnaam voorrang boven een oudere datum die toevallig in de passage voorkomt. Onderscheid strikt gebeurtenisdatum, documentdatum en registratiedatum: plaats een bron met uitsluitend een registratiedatum niet als gebeurtenis op die datum. Zet een gebeurtenis zonder betrouwbare datum onder "Datum onbekend" bij de vroegst aantoonbare bespreking. Benoem voorgeschiedenis, besluitvorming, offertes en opdrachten, uitvoering, oplevering of nazorg en huidige stand voor zover aanwezig. Controleer expliciet of latere storings-, herstel-, afrondings- en opleveringsbronnen de eerdere planning wijzigen. Een inhoudsarme bron bewijst alleen dat het genoemde document bestaat: beweer niet dat een opdracht, factuur, rapport of oplevering ontbreekt wanneer een passende inhoudsarme bron is aangeleverd; vermeld dan dat de inhoud niet kon worden uitgelezen en handmatig moet worden gecontroleerd. Signaleer bronconflicten, verschillende stemuitslagen of aantallen en onzekerheden beknopt. Onderbouw iedere gebeurtenis of conclusie met één of meer verwijzingen zoals [Bron 3] en gebruik exact de bestaande bronnummers. Schrijf maximaal 1.700 woorden, vermijd herhaling en reserveer altijd ruimte voor een volledige sectie "Huidige stand en ontbrekende stukken". Rond elke zin en het gehele antwoord volledig af. Gebruik Markdownkoppen met ## voor hoofddelen en ### voor subdelen en zet afzonderlijke gebeurtenisdatums tussen **dubbele sterretjes**. Verzin niets en geef geen juridisch, financieel of technisch eindoordeel. De applicatie maakt van uw antwoord met de knop PDF exporteren een downloadbaar rapport; beweer daarom nooit dat u geen PDF kunt maken.'
-        : 'U bent een uitsluitend lezende VvE-archiefassistent. Beantwoord de vraag alleen met de aangeleverde bronnen. Behandel uitsluitend informatie die inhoudelijk over het onderwerp van de vraag gaat; negeer passages waarin alleen een algemeen woord overeenkomt. Onderbouw beweringen met verwijzingen zoals [Bron 2]. Zeg het duidelijk als bronnen onvoldoende of tegenstrijdig zijn. Verzin niets. De applicatie kan het antwoord met de knop PDF exporteren downloaden; beweer niet dat dit onmogelijk is. Geef geen juridisch, financieel of technisch eindoordeel.';
-    $input="Vraag: {$question}\nIntentie: {$intent}\n\n{$sourceText}";
+        : 'U bent een uitsluitend lezende VvE-archiefassistent. Beantwoord de vraag alleen met de aangeleverde bronnen. Behandel uitsluitend informatie die inhoudelijk over het onderwerp van de vraag gaat; negeer passages waarin alleen een algemeen woord overeenkomt. Onderbouw beweringen met verwijzingen zoals [Bron 2]. Zeg het duidelijk als bronnen onvoldoende of tegenstrijdig zijn. Verzin niets. De applicatie kan het antwoord met de knop PDF exporteren downloaden; beweer niet dat dit onmogelijk is. Geef geen juridisch, financieel of technisch eindoordeel.');
+    $input="Vraag: {$question}\nIntentie: {$intent}\nPeildatum: ".date('Y-m-d')."\n\n{$sourceText}";
     return aiProviderText($config,$instructions,$input,$broad?3000:900);
 }

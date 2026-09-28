@@ -1,12 +1,21 @@
-# OpenVvE AI — ontwikkelbasis voor meerdere VvE's
+# OpenVvE AI — zelf te hosten VvE-software
 
 OpenVvE AI is bedoeld als gratis open-source software voor VvE-beheer die
-gebruikers zelf kunnen installeren, beheren en aanpassen. Deze repository is
-nog een **privé-ontwikkelbasis** en is nog niet openbaar uitgebracht. De eigen
-projectcode krijgt de AGPL-3.0-licentie; de meegeleverde PDF-parser behoudt
-zijn eigen LGPL-3.0-licentie. De beoogde projectwebsite is
-`openvveai.nl`. Zie [PROJECTVISIE.md](PROJECTVISIE.md) voor de positionering
-en de voorwaarden voor een latere openbare uitgave.
+gebruikers zelf kunnen installeren, beheren en aanpassen. De eigen
+projectcode valt onder de GNU Affero General Public License versie 3
+(AGPL-3.0-only); de meegeleverde PDF-parser behoudt zijn eigen LGPL-3.0-
+licentie. **Huidige versie: 8.50-beta.** Dit is een testversie; gebruik haar
+eerst in een afgeschermde testinstallatie met fictieve gegevens. Lees ook de
+[disclaimer](DISCLAIMER.md), [supportgrenzen](SUPPORT.md)
+en [derdenkennisgevingen](THIRD_PARTY_NOTICES.md). De GitHub-repository kan
+privé blijven totdat de eigenaar haar zichtbaarheid wijzigt; een push maakt
+een private repository niet automatisch openbaar.
+
+Als je een aangepaste versie op een server aanbiedt, lees dan ook AGPL-sectie 13:
+gebruikers die ermee via een netwerk communiceren moeten toegang krijgen tot de
+Corresponding Source van die draaiende versie. De huidige repository is privé;
+maak haar niet publiek beschikbaar voordat rechten op code, logo's en bijdragen
+zijn gecontroleerd.
 
 Deze versie bevat de volledige PHP-toepassing: contacten, adressen, relaties,
 activa, sleutels, onderhoud, MJOP-verwijzingen, projecten, vergaderingen,
@@ -31,6 +40,11 @@ Strato-account heeft toegang tot alle installaties. Het is geen afzonderlijk
 besturingssysteem of afzonderlijk hostingaccount per VvE. Voor onbetrouwbare
 beheerders met SFTP/PHP-toegang zijn afzonderlijke hostingaccounts nodig.
 
+De praktische voorbereiding en installatie per VvE staat in
+[ONBOARDING_NIEUWE_VVE.md](ONBOARDING_NIEUWE_VVE.md). Die gids beschrijft de
+huidige handmatige SSH-route; een webinstaller en release-ZIP zijn nog niet
+beschikbaar.
+
 ## Wat is bewust leeg?
 
 Geen bestaande contacten, adressen, documenten, e-mails, documentteksten,
@@ -43,15 +57,22 @@ De videofunctie blijft beschikbaar voor nieuwe, neutrale instructievideo's.
 
 De lege database bevat alleen de structuur. De installer voegt één installatie-ID
 en algemene namen van gebouwelementen toe, zonder oude documenten of paginanummers.
-Algemene nieuwe keuzelijsten staan in `templates/lookups.php`; categorieën en
-STABU-codes kunnen via Instellingen per VvE worden ingevuld.
+Algemene nieuwe keuzelijsten staan in `templates/lookups.php`. De keuzelijsten
+voor activa- en onderhoudscategorieën lezen bestaande omschrijvingen uit de
+gelijknamige databasetabellen. Een aanwezige `StabuCodes`-tabel wordt ook
+gelezen. In Instellingen kan de beheerder de getoonde tekst per code aanpassen
+of nieuwe codes toevoegen; die wijzigingen blijven in de privéconfiguratie
+van de eigen VvE en krijgen voorrang op de databasetekst.
 
 Externe AI staat standaard uit; de lokale bronnenzoeker blijft aanwezig.
 E-mail heeft nog geen accounts of wachtwoorden. Automatische back-ups staan uit.
 
 ## Nieuwe VvE voorbereiden
 
-Gebruik Python 3 op de ontwikkelcomputer. Werk vanuit deze map:
+De huidige installatie is handmatig; er is nog geen veilige webinstaller of
+kant-en-klaar installatie-ZIP. Maak eerst lokaal vanuit deze repository een
+gegevensvrije instantie. Daarvoor is Python 3 op de computer van de beheerder
+nodig:
 
 ```sh
 python3 tools/create_instance.py \
@@ -60,7 +81,8 @@ python3 tools/create_instance.py \
   --host demo-a.example.org
 ```
 
-Voer hetzelfde commando met een andere bestemming, naam en host uit voor VvE B.
+Voer hetzelfde commando met een andere bestemming, naam en host uit voor een
+andere VvE.
 Het script weigert bestaande installaties te overschrijven. Kopieer nooit de
 `private`-map van A naar B: de installatie-ID en gebruikers horen bij één VvE.
 
@@ -76,39 +98,50 @@ demo-a/
 
 ## Installatie op Strato
 
-1. Maak voor iedere VvE een eigen lege database met eigen toegangsgegevens.
-2. Upload de bijbehorende installatie, bijvoorbeeld naar `/vve-platform/demo-a`.
-3. Koppel het HTTPS-subdomein uitsluitend aan `/vve-platform/demo-a/public`.
+Dezelfde technische eisen gelden bij een andere provider. Controleer vooraf of
+het gekozen pakket de ondersteunde PHP-versie, extensies, database, HTTPS,
+document-root en SSH/SFTP biedt. Strato's pakketopties en paneel kunnen wijzigen;
+controleer de actuele providerinstellingen voordat je bestelt of migreert.
+
+1. Maak voor deze VvE een eigen lege MySQL/MariaDB-database en eigen
+   toegangsgegevens. Bewaar host, databasenaam, gebruikersnaam en wachtwoord
+   veilig; zet ze niet in Git, e-mail of openbare ondersteuningstickets.
+2. Upload de gegenereerde instantie met SFTP, bijvoorbeeld naar
+   `/vve-platform/demo-a`. In Strato moet de document-root van het eigen
+   subdomein uitsluitend naar `/vve-platform/demo-a/public` wijzen.
    Laat `private` en `install` daarbuiten. De extra `.htaccess`-bestanden blokkeren
    toegang via alternatieve domeinverwijzingen. Controleer ook het Strato-masteradres.
-4. Kopieer `private/config.example.php` naar `private/config.php` en vul uitsluitend
-   de nieuwe databasegegevens in. Houd private-bestanden op 0600 en mappen op 0700
-   waar de Strato-uitvoergebruiker dit ondersteunt. Gebruik nooit 0777.
-5. Voer via SSH, vanuit de installatie, uit:
+3. Kopieer op de server `private/config.example.php` naar `private/config.php`
+   en vul uitsluitend de nieuwe databasegegevens in. Houd private-bestanden op
+   0600 en mappen op 0700 waar de server dit ondersteunt. Gebruik nooit 0777.
+4. Voer via SSH vanuit de installatie uit:
 
    ```sh
+   cd /pad/naar/vve-platform/demo-a
    php install/create_admin.php
    php install/install.php
    php install/check.php
    ```
 
-   Gebruik het PHP 8.4-commando van de server. Het eerste script vraagt interactief
-   om een nieuw wachtwoord en slaat alleen de hash op. Er is geen standaardlogin.
-   De installer weigert iedere database die al tabellen of views bevat.
-   DDL is niet transactioneel: bij een mislukte import stopt de installer. Controleer
-   de oorzaak en gebruik vervolgens een nieuwe lege database; importeer niet over
-   de bestaande VvE-database heen.
+   Gebruik het PHP-CLI-commando dat bij de ingestelde runtime hoort. Het eerste
+   script vraagt interactief om een nieuw wachtwoord en slaat alleen de hash op.
+   Er is geen standaardlogin. De installer weigert iedere database die al tabellen
+   of views bevat. DDL is niet transactioneel: bij een mislukte import stopt de
+   installer. Controleer de oorzaak en gebruik vervolgens een nieuwe lege database;
+   importeer niet over de bestaande VvE-database heen.
 
-6. Controleer HTTPS, inloggen, een fictieve upload/download, zoeken, CRUD per module,
+5. Controleer HTTPS, inloggen, een fictieve upload/download, zoeken, CRUD per module,
    afmelden en de scheiding met een tweede VvE. Controleer dat `private/config.php`,
    `install/schema.json` en bestanden onder `private/uploads` via HTTP niet bereikbaar zijn,
    ook niet via het hoofddomein of Strato-masteradres.
-7. Maak daarna pas echte gebruikers of koppel eigen e-mail/AI-diensten.
+6. Maak daarna pas echte gebruikers of koppel eigen e-mail/AI-diensten.
 
-Benodigde PHP-extensies: PDO MySQL, mbstring, fileinfo, OpenSSL, ZIP en zlib.
-GD is nodig voor beeldverwerking. E-mailsynchronisatie vereist de PHP IMAP-extensie;
-de aanwezigheid daarvan op Strato moet afzonderlijk worden gecontroleerd.
-Uploadlimieten hangen ook af van `upload_max_filesize` en `post_max_size`.
+Getest met PHP 8.4. Benodigde PHP-extensies: PDO MySQL, mbstring, fileinfo,
+OpenSSL, ZIP, zlib en iconv. GD is nodig voor beeldverwerking.
+E-mailsynchronisatie vereist de PHP IMAP-extensie; beschikbaarheid verschilt per
+provider en pakket. De OpenAI-provider is optioneel en vraagt een eigen API-account
+en sleutel van de VvE. Uploadlimieten hangen ook af van `upload_max_filesize` en
+`post_max_size`.
 
 De applicatie voert de nieuwe schema-installatie buiten gewone webverzoeken uit.
 Gebruik indien de hosting dat toestaat een runtime-databasegebruiker met alleen
@@ -137,6 +170,17 @@ De eenmalige omzetting uit de oorspronkelijke VvE-toepassing en databaseback-up
 maakt geen deel uit van deze repository. Ontwikkel rechtstreeks in deze schone
 broncode; neem geen gegevens of Git-geschiedenis uit de oorspronkelijke VvE over.
 
+## Licentie, geen support en geen garantie
+
+Zie [LICENSE](LICENSE) voor de AGPL-3.0-licentie en
+[COPYING.LESSER](COPYING.LESSER) voor de licentie van de meegeleverde PDF-parser.
+De software is “zoals ze is”; er wordt geen garantie, aansprakelijkheid of
+supportdienst toegezegd, voor zover wettelijk toegestaan. De precieze grenzen en
+verantwoordelijkheden staan in [DISCLAIMER.md](DISCLAIMER.md) en [SUPPORT.md](SUPPORT.md).
+Deze projectteksten zijn geen juridisch advies. Controleer vóór een publieke
+release of de rechthebbenden toestemming hebben gegeven voor de uitgave en of
+alle gebruikte logo's en overige onderdelen juist zijn gelicentieerd.
+
 ## Controles
 
 De integratietest gebruikt twee nieuwe databases en fictieve records. Een
@@ -148,3 +192,5 @@ De integratietest vereist een expliciet opgegeven tijdelijke MariaDB-socket.
 Gebruik daarvoor geen bestaande productiedatabase. Op macOS moet het testvolume
 hoofdlettergevoelig zijn: het bestaande schema heeft twee verschillende tabelnamen
 die alleen in hoofdlettergebruik verschillen.
+**Huidige versie: 8.50-beta.** Dit is een testversie; gebruik haar eerst in
+een afgeschermde testinstallatie met fictieve gegevens.

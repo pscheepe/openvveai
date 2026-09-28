@@ -3,7 +3,95 @@ declare(strict_types=1);
 require_once __DIR__.'/tenant.php';
 
 function documentTextSupported(string $extension): bool {
-    return in_array(strtolower($extension), ['txt','md','csv','html','htm','xml','rtf','pdf','docx','dotx','xlsx','pptx','odt','ods','odp','odg','pages','numbers','key'], true);
+    return in_array(strtolower($extension), ['txt','md','csv','html','htm','xml','rtf','pdf','docx','dotx','xlsx','pptx','odt','ods','odp','odg','pages','numbers','key','eml','msg'], true);
+}
+
+function documentDecodeMimeHeader(string $value): string {
+    if (!function_exists('iconv_mime_decode')) return trim($value);
+    $decoded = @iconv_mime_decode($value, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 'UTF-8');
+    return trim(is_string($decoded) ? $decoded : $value);
+}
+
+function documentEmlText(string $path): string {
+    $raw = file_get_contents($path, false, null, 0, 5 * 1024 * 1024);
+    if (!is_string($raw)) throw new RuntimeException('E-mailbestand kon niet worden gelezen.');
+    $raw = str_replace(["\r\n", "\r"], "\n", $raw);
+    [$headerBlock, $body] = array_pad(explode("\n\n", $raw, 2), 2, '');
+    $headers = [];
+    foreach (preg_split('/\n(?=[^ \t])/', $headerBlock) ?: [] as $line) {
+        if (preg_match('/^([^:]+):\s*(.*)$/s', trim($line), $match)) {
+            $key = strtolower(trim($match[1]));
+            $headers[$key] = trim(($headers[$key] ?? '') . ' ' . trim($match[2]));
+        }
+    }
+    $parts = [];
+    foreach (['from'=>'Van','to'=>'Aan','cc'=>'Cc','date'=>'Datum','subject'=>'Onderwerp'] as $key=>$label) {
+        if (!empty($headers[$key])) $parts[] = $label . ': ' . documentDecodeMimeHeader((string)$headers[$key]);
+    }
+    $contentType = (string)($headers['content-type'] ?? 'text/plain');
+    $boundary = '';
+    if (preg_match('/boundary\s*=\s*(?:"([^"]+)"|([^;\s]+))/i', $contentType, $match)) $boundary = (string)($match[1] ?: $match[2]);
+    // A non-multipart message has its MIME metadata in the top-level headers;
+    // the body itself does not start with a second header block.
+    $candidates = $boundary !== '' ? explode('--' . $boundary, $body) : [$body];
+    $plain = '';
+    foreach ($candidates as $candidate) {
+        if ($boundary === '') {
+            $partHeaders = $headerBlock;
+            $partBody = $candidate;
+            $partType = strtolower(trim(strtok($contentType, ';') ?: 'text/plain'));
+            $encoding = strtolower(trim((string)($headers['content-transfer-encoding'] ?? '')));
+        } else {
+            $candidate = ltrim($candidate, "\n-");
+            if (trim($candidate) === '' || preg_match('/^--\s*$/', trim($candidate))) continue;
+            [$partHeaders, $partBody] = array_pad(explode("\n\n", $candidate, 2), 2, '');
+            $partType = 'text/plain'; $encoding = '';
+            foreach (preg_split('/\n/', $partHeaders) ?: [] as $line) {
+                if (preg_match('/^Content-Type:\s*([^;]+)/i', $line, $match)) $partType = strtolower(trim($match[1]));
+                if (preg_match('/^Content-Transfer-Encoding:\s*(\S+)/i', $line, $match)) $encoding = strtolower(trim($match[1]));
+            }
+        }
+        if ($partType !== 'text/plain' || preg_match('/Content-Disposition:\s*attachment/i', $partHeaders)) continue;
+        if ($encoding === 'base64') $partBody = (string)(base64_decode(preg_replace('/\s+/', '', $partBody) ?? '', true) ?: '');
+        elseif ($encoding === 'quoted-printable') $partBody = quoted_printable_decode($partBody);
+        if (preg_match('/charset\s*=\s*["\']?([^;"\']+)/i', $partHeaders, $match) && !mb_check_encoding($partBody, 'UTF-8')) {
+            $converted = @mb_convert_encoding($partBody, 'UTF-8', trim($match[1]));
+            if (is_string($converted)) $partBody = $converted;
+        }
+        $plain .= "\n" . $partBody;
+        if ($boundary === '') break;
+    }
+    if ($plain === '' && trim($body) !== '') $plain = $body;
+    $plain = html_entity_decode(strip_tags($plain), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $plain = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', ' ', $plain) ?? $plain;
+    $parts[] = trim($plain);
+    return mb_substr(trim(implode("\n", $parts)), 0, 1000000);
+}
+
+function documentMsgText(string $path): string {
+    $size = filesize($path);
+    if ($size === false || $size > 15 * 1024 * 1024) throw new RuntimeException('Outlook .msg groter dan 15 MB; automatische indexering overgeslagen.');
+    $raw = file_get_contents($path);
+    if (!is_string($raw)) throw new RuntimeException('Outlook .msg kon niet worden gelezen.');
+    // MSG is an OLE compound file; recover printable ANSI and UTF-16LE runs
+    // from its property streams while ignoring binary/control data.
+    $chunks = [];
+    if (preg_match_all('/(?:[\x20-\x7E\xA0-\xFF]\x00){3,}/s', $raw, $matches)) {
+        foreach ($matches[0] as $chunk) {
+            $text = @iconv('UTF-16LE', 'UTF-8//IGNORE', $chunk);
+            if (is_string($text) && trim($text) !== '') $chunks[] = trim($text);
+        }
+    }
+    if (preg_match_all('/[\x20-\x7E\xA0-\xFF]{12,}/', $raw, $matches)) {
+        foreach ($matches[0] as $chunk) {
+            if (preg_match('/^(?:__substg|__properties|__nameid|Root Entry)/i', $chunk)) continue;
+            $chunks[] = trim($chunk);
+        }
+    }
+    $text = implode("\n", array_unique($chunks));
+    $text = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', ' ', $text) ?? $text;
+    $text = preg_replace('/[ \t]+/u', ' ', $text) ?? $text;
+    return mb_substr(trim($text), 0, 1000000);
 }
 
 function documentPresentationXmlText(string $xml): string {
@@ -117,6 +205,8 @@ function documentIworkPreviewText(string $path): array {
 
 function documentPlainText(string $path, string $extension): ?string {
     $extension = strtolower($extension);
+    if ($extension === 'eml') return documentEmlText($path);
+    if ($extension === 'msg') return documentMsgText($path);
     if (!documentTextSupported($extension) || $extension === 'pdf' || in_array($extension, ['docx','dotx','xlsx','pptx','odt','ods','odp','odg','pages','numbers','key'], true)) return null;
     $raw = file_get_contents($path, false, null, 0, 2 * 1024 * 1024);
     if ($raw === false) throw new RuntimeException('Bestand kon niet voor indexering worden gelezen.');
@@ -167,10 +257,10 @@ function indexDocumentText(PDO $pdo, int $documentId, string $path, string $orig
             if ($status === 'overgeslagen') $error = 'Geen leesbare tekst in het document gevonden.';
         } catch (Throwable $e) { $status = 'mislukt'; $error = mb_substr($e->getMessage(), 0, 500); }
     } elseif (documentTextSupported($extension)) {
-        try { $text = documentPlainText($path, $extension); $status = 'gereed'; }
+        try { $text = documentPlainText($path, $extension); $status = trim((string)$text)==='' ? 'niet-ondersteund' : 'gereed'; if($status==='niet-ondersteund')$error=$extension==='msg'?'Geen leesbare berichttekst herkend in het Outlook-bestand.':'Geen leesbare berichttekst gevonden.'; }
         catch (Throwable $e) { $status = 'mislukt'; $error = mb_substr($e->getMessage(), 0, 500); }
     }
-    $s = $pdo->prepare('INSERT INTO DocumentTekstIndex (DocumentID,Status,ExtractorVersie,Tekst,Foutmelding,BijgewerktOp) VALUES (?,?,6,?,?,?) ON DUPLICATE KEY UPDATE Status=VALUES(Status),ExtractorVersie=VALUES(ExtractorVersie),Tekst=VALUES(Tekst),Foutmelding=VALUES(Foutmelding),BijgewerktOp=VALUES(BijgewerktOp)');
+    $s = $pdo->prepare('INSERT INTO DocumentTekstIndex (DocumentID,Status,ExtractorVersie,Tekst,Foutmelding,BijgewerktOp) VALUES (?,?,8,?,?,?) ON DUPLICATE KEY UPDATE Status=VALUES(Status),ExtractorVersie=8,Tekst=VALUES(Tekst),Foutmelding=VALUES(Foutmelding),BijgewerktOp=VALUES(BijgewerktOp)');
     $s->execute([$documentId,$status,$text,$error,date('Y-m-d H:i:s')]);
     $pdo->prepare('DELETE FROM DocumentTekstPagina WHERE DocumentID=?')->execute([$documentId]);
     if ($pages) {

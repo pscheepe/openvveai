@@ -4,6 +4,7 @@ require_once __DIR__.'/tenant.php';
 require_once __DIR__ . '/activity.php';
 require_once __DIR__ . '/mail_credentials.php';
 require_once __DIR__ . '/maintenance_mjop.php';
+require_once __DIR__ . '/lookup_catalogs.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
@@ -32,11 +33,48 @@ try {
                 $statusOptions[$e]=array_map(fn($v)=>['value'=>$v,'label'=>$v],$st);
             }else $statusOptions[$e]=[];
         }
-        $loadedLookups=loadLookups();
+        $loadedLookups=loadLookups($pdo);
+        foreach($statusOptions as $group=>$options){
+            $configured=(array)($loadedLookups[$group]['Status']??[]);
+            $merged=[];$seen=[];
+            foreach(array_merge(array_map(static fn($x)=>(string)($x['value']??''),$options),array_map('strval',array_values($configured))) as $value){
+                $value=trim((string)$value);if($value===''||isset($seen[$value]))continue;$seen[$value]=true;$merged[]=['value'=>$value,'label'=>$value];
+            }
+            $statusOptions[$group]=$merged;
+        }
         if(isset($map['maintenance_plans'])){
             $statusOptions['maintenance_plans']=array_map(fn($v)=>['value'=>$v,'label'=>$v],(array)($loadedLookups['maintenance_plans']['Status']??[]));
         }
         out(['ok'=>true,'entities'=>$info,'lookups'=>$loadedLookups,'required'=>requiredFields($pdo,$map),'statusOptions'=>$statusOptions,'maintenanceOptions'=>maintenanceOptions($pdo,$map),'user'=>$user,'csrf'=>csrfToken()]);
+    }
+    if($action==='contact_picker'){
+        requireAdmin();
+        if(!isset($map['contacts'],$map['addresses']))throw new RuntimeException('Contacten of adressen zijn niet beschikbaar.');
+        $contactTable=$map['contacts'];$contactPk=primaryKey($pdo,$contactTable,'contacts');$rows=listRows($pdo,$contactTable,'','__all__');
+        $addressTable=$map['addresses'];$addressCols=columns($pdo,$addressTable);$contactRef=findCol($addressCols,['ContactID','contact_id']);$residentRef=findCol($addressCols,['Bewoner_ContactID','bewoner_contact_id']);
+        $addressFields=[];foreach(['Straat','Huisnummer','Postcode','Woonplaats','Hal','Etage'] as $candidate){$actual=actualCol($addressCols,$candidate);if($actual)$addressFields[]=$actual;}
+        $addresses=$pdo->query('SELECT * FROM '.qi($addressTable))->fetchAll(PDO::FETCH_ASSOC);$byContact=[];
+        foreach($addresses as $address){$parts=[];foreach($addressFields as $field){$value=trim((string)($address[$field]??''));if($value!=='')$parts[]=$value;}$label=implode(', ',$parts);if($label==='')continue;foreach(array_filter([$contactRef?$address[$contactRef]??null:null,$residentRef?$address[$residentRef]??null:null],static fn($v)=>$v!==null&&$v!==''&&$v!=='0') as $id){$key=(string)$id;$byContact[$key][]=$label;}}
+        foreach($rows as &$row){$id=(string)($row[$contactPk]??'');$row['_picker_address']=implode(' · ',array_values(array_unique($byContact[$id]??[])));}unset($row);
+        out(['ok'=>true,'rows'=>$rows]);
+    }
+    if($action==='asset_order'){
+        if(!isset($map['Activa']))throw new RuntimeException('Activa zijn niet beschikbaar.');
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `VveguiActivaVolgorde` (`ActivaID` INT(10) UNSIGNED NOT NULL,`Volgorde` INT NOT NULL DEFAULT 0,PRIMARY KEY (`ActivaID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        if($_SERVER['REQUEST_METHOD']==='POST'){
+            requireAdmin();verifyCsrf();$body=json_decode((string)file_get_contents('php://input'),true);if(!is_array($body))$body=[];
+            $parent=trim((string)($body['parent_id']??''));$ids=array_values(array_unique(array_filter(array_map('intval',(array)($body['ids']??[])),static fn($v)=>$v>0)));
+            if($parent!==''&&!ctype_digit($parent))throw new RuntimeException('Ongeldig hoofdonderdeel.');
+            $table=$map['Activa'];$pk=primaryKey($pdo,$table,'Activa');$cols=columns($pdo,$table);$parentCol=actualCol($cols,'ParentActivaID');if(!$parentCol)throw new RuntimeException('De activa-hiërarchie is niet beschikbaar.');
+            if($parent!==''&&$parent!=='0'){$check=$pdo->prepare('SELECT COUNT(*) FROM '.qi($table).' WHERE '.qi($pk).'=?');$check->execute([$parent]);if((int)$check->fetchColumn()!==1)throw new RuntimeException('Hoofdonderdeel bestaat niet.');$q=$pdo->prepare('SELECT '.qi($pk).' FROM '.qi($table).' WHERE '.qi($parentCol).'=? ORDER BY '.qi($pk));$q->execute([$parent]);}
+            else $q=$pdo->query('SELECT '.qi($pk).' FROM '.qi($table).' WHERE '.qi($parentCol).' IS NULL OR '.qi($parentCol).'=0 ORDER BY '.qi($pk));
+            $siblings=array_map('intval',$q->fetchAll(PDO::FETCH_COLUMN));sort($ids);$expected=$siblings;sort($expected);if($ids!==$expected)throw new RuntimeException('De lijst is intussen gewijzigd. Ververs de pagina en probeer opnieuw.');
+            $pdo->beginTransaction();try{$up=$pdo->prepare('INSERT INTO `VveguiActivaVolgorde` (ActivaID,Volgorde) VALUES (?,?) ON DUPLICATE KEY UPDATE Volgorde=VALUES(Volgorde)');foreach((array)($body['ids']??[]) as $i=>$id)$up->execute([(int)$id,($i+1)*10]);$pdo->commit();}catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();throw$e;}
+            $nameCol=actualCol($cols,'Naam');$labels=[];if($ids&&$nameCol){$marks=implode(',',array_fill(0,count($ids),'?'));$names=$pdo->prepare('SELECT '.qi($pk).' AS id,'.qi($nameCol).' AS label FROM '.qi($table).' WHERE '.qi($pk).' IN ('.$marks.')');$names->execute($ids);$byId=[];foreach($names->fetchAll(PDO::FETCH_ASSOC) as $item)$byId[(string)$item['id']]=(string)$item['label'];foreach($ids as $itemId)if(isset($byId[(string)$itemId]))$labels[]=$byId[(string)$itemId];}$groupLabel='het hoofdniveau';if($parent!==''&&$parent!=='0'&&$nameCol){$parentName=$pdo->prepare('SELECT '.qi($nameCol).' FROM '.qi($table).' WHERE '.qi($pk).'=?');$parentName->execute([$parent]);$groupLabel='“'.(string)$parentName->fetchColumn().'”';}$shown=array_slice($labels,0,12);$detail=$shown?implode(', ',$shown):count($ids).' activa';if(count($labels)>12)$detail.=' en '.(count($labels)-12).' overige activa';$description='De volgorde van de activa binnen '.$groupLabel.' is aangepast. Nieuwe volgorde: '.$detail.'.';recordActivity($pdo,$user,'activa-volgorde-gewijzigd','database','Activa',$parent?:'hoofdgroepen',$description);out(['ok'=>true]);
+        }
+        $table=$map['Activa'];$cols=columns($pdo,$table);$pk=primaryKey($pdo,$table,'Activa');$parentCol=actualCol($cols,'ParentActivaID');$nameCol=actualCol($cols,'Naam');
+        if($parentCol){$select='SELECT '.qi($pk).' AS id,'.qi($parentCol).' AS parent'.($nameCol?','.qi($nameCol).' AS label':''). ' FROM '.qi($table).' ORDER BY '.qi($parentCol).','.($nameCol?qi($nameCol).',':'').qi($pk);$groups=[];foreach($pdo->query($select)->fetchAll(PDO::FETCH_ASSOC) as $row){$key=trim((string)($row['parent']??''));if($key===''||$key==='0')$key='0';$groups[$key][]=$row;}$get=$pdo->query('SELECT ActivaID,Volgorde FROM `VveguiActivaVolgorde`')->fetchAll(PDO::FETCH_KEY_PAIR);$up=$pdo->prepare('INSERT INTO `VveguiActivaVolgorde` (ActivaID,Volgorde) VALUES (?,?) ON DUPLICATE KEY UPDATE Volgorde=VALUES(Volgorde)');foreach($groups as $siblings){usort($siblings,static function($a,$b)use($get){$ai=(string)$a['id'];$bi=(string)$b['id'];$aHas=array_key_exists($ai,$get);$bHas=array_key_exists($bi,$get);if($aHas&&$bHas)return(int)$get[$ai]<=>(int)$get[$bi];if($aHas!==$bHas)return$aHas?-1:1;return strnatcasecmp((string)($a['label']??$ai),(string)($b['label']??$bi));});$rank=0;foreach($siblings as $row){$id=(string)$row['id'];if(array_key_exists($id,$get)){$rank=max($rank,(int)$get[$id]);continue;}$rank+=10;$up->execute([(int)$id,$rank]);$get[$id]=$rank;}}}
+        $rows=$pdo->query('SELECT ActivaID,Volgorde FROM `VveguiActivaVolgorde`')->fetchAll(PDO::FETCH_KEY_PAIR);out(['ok'=>true,'order'=>$rows,'csrf'=>csrfToken()]);
     }
     if ($action === 'meeting_actions') {
         if(!isset($map['meetings'],$map['actions'])) throw new RuntimeException('Vergaderingen/ActieRegister niet beschikbaar.');
@@ -146,7 +184,7 @@ try {
             if($ud!=='' && $rd!=='' && preg_match('/^\d{4}-\d{2}-\d{2}$/',$ud) && preg_match('/^\d{4}-\d{2}-\d{2}$/',$rd) && $rd<$ud) throw new RuntimeException('Retourdatum kan niet vóór de uitleendatum liggen.');
         }
         if($entity==='Activa' && array_key_exists('ActivaCatID',$body) && trim((string)$body['ActivaCatID'])!==''){
-            $lookups=loadLookups();
+            $lookups=loadLookups($pdo);
             $cats=(array)($lookups['Activa']['ActivaCatID']??[]);
             if(!lookupIdExists($cats,trim((string)$body['ActivaCatID']))) throw new RuntimeException('Ongeldige Activa-categorie.');
         }
@@ -170,15 +208,15 @@ try {
                 if((int)$q->fetchColumn()!==1) throw new RuntimeException('Ongeldig Activum: het gekozen Activum-ID bestaat niet of is niet actief.');
             }
             if(array_key_exists('OnderhoudsCategorie',$body) && trim((string)$body['OnderhoudsCategorie'])!==''){
-                $cats=(array)(loadLookups()['maintenance_plans']['OnderhoudsCategorie']??[]);
+                $cats=(array)(loadLookups($pdo)['maintenance_plans']['OnderhoudsCategorie']??[]);
                 if(!lookupIdExists($cats,trim((string)$body['OnderhoudsCategorie']))) throw new RuntimeException('Ongeldige onderhoudscategorie.');
             }
             if(array_key_exists('Status',$body)){
-                $allowed=(array)(loadLookups()['maintenance_plans']['Status']??[]);
+                $allowed=(array)(loadLookups($pdo)['maintenance_plans']['Status']??[]);
                 if($body['Status']!==null && $body['Status']!=='' && !in_array((string)$body['Status'],array_map('strval',$allowed),true)) throw new RuntimeException('Ongeldige status voor onderhoudsplan.');
             }
             if(array_key_exists('Indexering',$body) && $body['Indexering']!==null && $body['Indexering']!=='' && !is_numeric(str_replace(',','.',(string)$body['Indexering']))) throw new RuntimeException('Indexering moet een percentage zijn.');
-            if(array_key_exists('StabuCode',$body) && $body['StabuCode']!==null && $body['StabuCode']!==''){ $stabu=(array)(loadLookups()['maintenance_plans']['StabuCode']??[]); if(!array_key_exists((string)$body['StabuCode'],$stabu) && !array_key_exists((int)$body['StabuCode'],$stabu)) throw new RuntimeException('Ongeldige STABU-code.'); }
+            if(array_key_exists('StabuCode',$body) && $body['StabuCode']!==null && $body['StabuCode']!==''){ $stabu=(array)(loadLookups($pdo)['maintenance_plans']['StabuCode']??[]); if(!array_key_exists((string)$body['StabuCode'],$stabu) && !array_key_exists((int)$body['StabuCode'],$stabu)) throw new RuntimeException('Ongeldige STABU-code.'); }
         }
         $newId=saveRow($pdo,$map[$entity],$entity,$id,$body,(string)$user['username']);
         // Bij een nieuw dieper record worden de bestaande relationele verbindingen
@@ -479,7 +517,7 @@ function smtpSendHtml(array $recipients,string $subject,string $html,string $pla
         smtpExpectCode($fp,[250]); smtpCmd($fp,'QUIT',[221]);
     } finally { fclose($fp); }
 }
-function loadLookups(): array { $f=tenantPrivateFile('lookups.php');if(!is_file($f))return[];$x=include$f;return is_array($x)?$x:[]; }
+function loadLookups(?PDO $db=null): array { $f=tenantPrivateFile('lookups.php');$x=is_file($f)?include $f:[];$lookups=is_array($x)?$x:[];return $db?catalogLookups($db,$lookups):$lookups; }
 function lookupIdLabelOptions(array $values): array {
     $out=[];
     foreach($values as $id=>$label){
@@ -867,7 +905,7 @@ function ensureMaintenanceSchema(PDO $p,array $m): void {
     }
 }
 function maintenanceOptions(PDO $p,array $m): array {
-    $out=['assets'=>[],'relations'=>[],'categories'=>[],'stabu'=>[],'mjop'=>[],'stabu_source'=>'lookups.php'];
+    $out=['assets'=>[],'relations'=>[],'categories'=>[],'stabu'=>[],'mjop'=>[],'stabu_source'=>'instellingen en database'];
     if(isset($m['Activa'])){
         $t=$m['Activa'];$c=columns($p,$t);$pk=primaryKey($p,$t,'Activa');$name=findCol($c,['Naam','Name','Omschrijving']);
         if($name){
@@ -884,10 +922,9 @@ function maintenanceOptions(PDO $p,array $m): array {
             $out['relations']=$p->query($sql)->fetchAll();
         }
     }
-    // Onderhoudscategorie is relationeel opgeslagen als ID, maar de bron voor de keuzelijst
-    // is bewust lookups.php. De database wordt hier niet meer als lookupbron gebruikt.
-    $out['categories']=lookupIdLabelOptions((array)(loadLookups()['maintenance_plans']['OnderhoudsCategorie']??[]));
-    $lookup=(array)(loadLookups()['maintenance_plans']['StabuCode']??[]);
+    // De opgeslagen labels krijgen voorrang; ontbrekende opties komen uit de catalogustabellen.
+    $out['categories']=lookupIdLabelOptions((array)(loadLookups($p)['maintenance_plans']['OnderhoudsCategorie']??[]));
+    $lookup=(array)(loadLookups($p)['maintenance_plans']['StabuCode']??[]);
     foreach($lookup as $code=>$label)$out['stabu'][]=['code'=>(string)$code,'label'=>(string)$label];
     $out['mjop']=maintenanceMjopOptions($p);
     return $out;

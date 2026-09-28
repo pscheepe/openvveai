@@ -5,6 +5,7 @@ require_once __DIR__.'/auth.php';
 require_once __DIR__.'/security.php';
 require_once __DIR__.'/activity.php';
 require_once __DIR__.'/ai_provider.php';
+require_once __DIR__.'/assistant_financial.php';
 header('Content-Type: application/json; charset=utf-8');
 
 function assistantOut(array $data,int $status=200): never {
@@ -15,7 +16,7 @@ function assistantOut(array $data,int $status=200): never {
 function assistantTerms(string $question): array {
     $question=mb_strtolower($question);
     $parts=preg_split('/[^\p{L}\p{N}]+/u',$question,-1,PREG_SPLIT_NO_EMPTY)?:[];
-    $stop=['aan','als','alles','bestand','bestanden','betreffende','betrekking','bij','chronologisch','chronologische','correspondentie','database','dat','de','den','der','die','dit','doe','doet','downloadable','donwloadable','een','en','er','geef','heeft','hebben','het','hoe','ik','in','is','kan','laatste','maak','maken','met','naar','niet','nummer','of','om','op','over','overzicht','pdf','project','rapport','resultaat','samenvatting','staat','te','van','voor','wat','waar','welk','welke','wie','woont','wonen','wordt','zijn'];
+    $stop=['aan','als','alles','bestand','bestanden','betreffende','betrekking','bij','chronologisch','chronologische','correspondentie','database','dat','de','den','der','die','dit','doe','doet','downloadable','donwloadable','een','en','er','geef','heeft','hebben','het','hoe','ik','in','is','kan','laatste','maak','maken','meest','met','msg','naar','niet','nummer','of','om','op','over','overzicht','pdf','project','rapport','resultaat','samenvatting','staat','te','van','voor','voorkomende','wat','waar','welk','welke','wie','woont','wonen','wordt','zijn','zoek','zoeken','eml'];
     $terms=[];
     foreach($parts as $part){
         if(mb_strlen($part)<3||in_array($part,$stop,true))continue;
@@ -176,7 +177,10 @@ function assistantDedupeSources(array $sources): array {
             $overlap=$tokens&&$otherTokens?count(array_intersect($tokens,$otherTokens))/max(1,min(count($tokens),count($otherTokens))):0;
             $sameTitle=$title!==''&&$title===$otherTitle;
             $sameFolder=assistantComparable((string)($source['folder']??''))===assistantComparable((string)($existing['folder']??''));
-            if(($kind==='document'&&$otherKind==='document'&&$sameTitle&&$sameFolder)||($kind==='email'&&$otherKind==='email'&&$sameTitle&&$overlap>=.65)||($kind===$otherKind&&$overlap>=.94)||($kind!==$otherKind&&$overlap>=.92)){$duplicate=true;break;}
+            // Similar-looking messages often share boilerplate. Distinct file
+            // documents must remain separate sources; only collapse a true
+            // same-title duplicate in the same folder.
+            if(($kind==='document'&&$otherKind==='document'&&$sameTitle&&$sameFolder)||($kind==='email'&&$otherKind==='email'&&$sameTitle&&$sameFolder&&$overlap>=.65)){$duplicate=true;break;}
         }
         if($duplicate)continue;
         $source['_dedupe_kind']=$kind;$source['_dedupe_title']=$title;$source['_dedupe_tokens']=$tokens;$result[]=$source;
@@ -257,6 +261,61 @@ function assistantPruneBroadSources(array $sources,array $terms): array {
     return $result?:$sources;
 }
 
+function assistantFinancialDocumentSources(PDO $pdo,string $question,array $vendorTerms): array {
+    $stmt=$pdo->prepare("SELECT d.DocumentID,d.Titel,d.OrigineleNaam,d.Mimetype,d.Bron,d.ExterneUrl,d.Omschrijving,d.Documentdatum,d.AangemaaktOp,d.GewijzigdOp,m.Pad MapNaam,ti.Tekst,COALESCE(ti.Status,'niet-geindexeerd') IndexStatus FROM DocumentBibliotheek d JOIN DocumentMappen m ON m.MapID=d.MapID LEFT JOIN DocumentTekstIndex ti ON ti.DocumentID=d.DocumentID WHERE d.IsHuidig=1 AND d.VerwijderdOp IS NULL AND (m.Pad LIKE '%Financ%' OR d.OrigineleNaam REGEXP '^(Crediteuren|Inkoopfacturen|Betalingen|Grootboek|Offertes|Contracten|MJOP|Leveranciers).*\\.csv$') LIMIT 600");
+    $stmt->execute();$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
+    $invoiceIds=assistantFinancialInvoiceIds($rows,$vendorTerms);
+    $supplierIds=assistantFinancialSupplierIds($rows,$vendorTerms);
+    $years=[];if(preg_match_all('/\b20\d{2}\b/u',$question,$matches))$years=array_values(array_unique($matches[0]));
+    $wantsPayment=(bool)preg_match('/\b(?:betaal\w*|betal\w*|voldaan)\b/iu',$question);
+    $wantsLedger=(bool)preg_match('/\b(?:grootboek\w*|boekhoud\w*|kosten\w*|uitgav\w*)\b/iu',$question);
+    $wantsInvoice=(bool)preg_match('/\b(?:factur\w*|crediteur\w*)\b/iu',$question);
+    $wantsOpen=(bool)preg_match('/\b(?:openstaand\w*|onbetaald\w*|nog\s+open)\b/iu',$question);
+    $wantsOffer=(bool)preg_match('/\boffert\w*\b/iu',$question);
+    $wantsContract=(bool)preg_match('/\bcontract\w*\b/iu',$question);
+    $wantsBudget=(bool)preg_match('/\b(?:begrot\w*|budget\w*|mjop)\b/iu',$question);
+    $specific=$wantsPayment||$wantsLedger||$wantsInvoice||$wantsOffer||$wantsContract||$wantsBudget;
+    $sources=[];
+    foreach($rows as $row){
+        $name=(string)$row['OrigineleNaam'];$title=(string)$row['Titel'];$text=(string)($row['Tekst']??'');
+        if(assistantGeneratedReport($title,$name))continue;
+        if($years&&preg_match('/_(20\d{2})(?:_|\.)/u',$name,$yearMatch)&&!in_array($yearMatch[1],$years,true))continue;
+        $csv=(bool)preg_match('/\.csv$/iu',$name);
+        $isInvoice=(bool)preg_match('/^(?:Crediteuren|Inkoopfacturen)/iu',$name);
+        $isPayment=(bool)preg_match('/^Betalingen/iu',$name);
+        $isLedger=(bool)preg_match('/^Grootboek/iu',$name);
+        $isOffer=(bool)preg_match('/^Offertes/iu',$name);
+        $isContract=(bool)preg_match('/^Contracten/iu',$name);
+        $isBudget=(bool)preg_match('/^MJOP/iu',$name);
+        if($csv&&$specific&&!($isInvoice&&($wantsPayment||$wantsLedger||$wantsInvoice))&&!($isPayment&&$wantsPayment)&&!($isLedger&&$wantsLedger)&&!($isOffer&&$wantsOffer)&&!($isContract&&$wantsContract)&&!($isBudget&&$wantsBudget))continue;
+        if($csv){
+            $linkedIds=($isPayment||$isLedger)?$invoiceIds:[];
+            $paidThrough=$isPayment&&!preg_match('/\b(?:gepland\w*|toekomst\w*|verwacht\w*)\b/iu',$question)?date('Y-m-d'):null;
+            $requiredStatus=$isInvoice&&$wantsOpen&&!$wantsPayment?'openstaand':null;
+            $snippet=assistantFinancialCsvExcerpt($text,$vendorTerms,5000,$linkedIds,$supplierIds,$paidThrough,$requiredStatus);
+            if($snippet==='')continue;
+        }else{
+            if($specific){
+                $nameText=$title.' '.$name;
+                $relevant=($wantsPayment||$wantsInvoice)&&preg_match('/\b(?:factuur\w*|crediteur\w*|betaling\w*|IN-\d)/iu',$nameText)
+                    ||$wantsLedger&&preg_match('/\b(?:grootboek\w*|boekhoud\w*)/iu',$nameText)
+                    ||$wantsOffer&&preg_match('/\boffert\w*/iu',$nameText)
+                    ||$wantsContract&&preg_match('/\bcontract\w*/iu',$nameText)
+                    ||$wantsBudget&&preg_match('/\b(?:mjop|begrot\w*|budget\w*)/iu',$nameText);
+                if(!$relevant)continue;
+            }
+            if($vendorTerms){$matched=true;foreach($vendorTerms as $term)if(mb_stripos($title.' '.$name.' '.$text,$term)===false)$matched=false;if(!$matched)continue;}
+            if($wantsOpen&&!$wantsPayment&&!preg_match('/\b(?:openstaand\w*|onbetaald\w*|nog\s+open)\b/iu',$text))continue;
+            $snippet=assistantSnippet($text!==''?$text:(string)$row['Omschrijving'],$vendorTerms,1200);
+            if($snippet==='')continue;
+        }
+        $score=($csv?100:10)+($isPayment&&$wantsPayment?30:0)+($isInvoice&&$wantsPayment?25:0)+($isLedger&&$wantsLedger?30:0)+($isOffer&&$wantsOffer?30:0)+($isContract&&$wantsContract?30:0)+($isBudget&&$wantsBudget?30:0);
+        $sources[]=['kind'=>'document','id'=>(int)$row['DocumentID'],'title'=>$title,'filename'=>$name,'mimetype'=>(string)$row['Mimetype'],'folder'=>(string)$row['MapNaam'],'source'=>(string)$row['Bron'],'external_url'=>(string)($row['ExterneUrl']??''),'pages'=>[],'best_page'=>null,'snippet'=>$snippet,'score'=>$score,'matched_terms'=>$vendorTerms,'date'=>(string)($row['Documentdatum']?:($row['GewijzigdOp']?:$row['AangemaaktOp'])),'content_dates'=>[],'timeline_date'=>assistantTitleDate($title.' '.$name),'timeline_date_kind'=>'titel','content_quality'=>''];
+    }
+    usort($sources,static fn($a,$b)=>$b['score']<=>$a['score']?:strcmp($a['filename'],$b['filename']));
+    return array_slice($sources,0,24);
+}
+
 try {
     $user=requireLogin();
     if($_SERVER['REQUEST_METHOD']!=='POST')throw new SafeInputException('Gebruik een POST-verzoek.');
@@ -267,12 +326,18 @@ try {
     $pdo=db(loadConfigCompat(tenantPrivateFile('config.php')));
 
     $classification=null;$classificationWarning='';
-    $obviousArchive=(bool)preg_match('/\b(chronologisch|chronologische|tijdlijn|dossier|archief|documenten|correspondentie|e-?mail|notulen|offertes?|facturen?|besluiten?)\b/iu',$question);
-    $obviousBroad=(bool)preg_match('/\b(alles|chronologisch|chronologische|tijdlijn|compleet|volledig|correspondentie|dossier|onderzoek|rapport|samenvatting)\b/iu',$question);
+    $vendorTerms=assistantFinancialVendorTerms($question);
+    $financialQuestion=assistantFinancialIsQuestion($question);
+    $emailFileExtension='';if(preg_match('/\b(eml|msg)\b/iu',$question,$extensionMatch))$emailFileExtension=strtolower($extensionMatch[1]);
+    $explicitEmailFileSearch=$emailFileExtension!=='';
+    $complaintQuestion=(bool)preg_match('/\b(klacht\w*|storing\w*|defect\w*|meest\s+voorkomende|frequent\w*)\b/iu',$question);
+    $obviousArchive=$financialQuestion||$explicitEmailFileSearch||(bool)preg_match('/\b(chronologisch|chronologische|tijdlijn|dossier|archief|documenten|correspondentie|e-?mail|notulen|offertes?|facturen?|besluiten?)\b/iu',$question);
+    $obviousBroad=$explicitEmailFileSearch||(bool)preg_match('/\b(alles|chronologisch|chronologische|tijdlijn|compleet|volledig|correspondentie|dossier|onderzoek|rapport|samenvatting|meest\s+voorkomende|frequent\w*|vaakst)\b/iu',$question);
     if($obviousArchive){
         $extraTerms=[];
         if(preg_match('/\b(beveiligingscamera(?:\x{2019}s|s)?|camera(?:\x{2019}s|s)?|cameratoezicht)\b/iu',$question))$extraTerms=['beveiligingscamera','camera','cameratoezicht','reolink','nvr'];
         elseif(preg_match('/\b(appartementsdeur|appartementsdeuren|voordeur|voordeuren|daloc|mijnvoordeur|cilinder|deurdranger|faac|toegangsdeur|toegangsdeuren|entreedeur|entreedeuren)\b/iu',$question))$extraTerms=['appartementsdeur','voordeur','daloc','mijnvoordeur','cilinder','deurdranger'];
+        if($complaintQuestion)$extraTerms=array_merge($extraTerms,['melding','klacht','storing','defect','overlast']);
         $classification=['archive'=>true,'scope'=>$obviousBroad?'broad':'targeted','search_query'=>$question,'search_terms'=>$extraTerms,'provider'=>aiProviderStatus()['provider'],'model'=>aiProviderStatus()['model']];
     }else try{$classification=aiProviderClassify($question);}catch(Throwable $classificationError){$classificationWarning='De AI-vraaganalyse was niet beschikbaar; de lokale herkenning is gebruikt.';}
     if($classification!==null&&!$classification['archive']){
@@ -280,15 +345,25 @@ try {
         recordActivity($pdo,$user,'ai-vraag-gesteld','assistent','algemene-vraag','',mb_substr($question,0,300).' · geen archiefzoekactie');
         assistantOut(['ok'=>true,'answer'=>$direct['text'],'answer_kind'=>'ai','ai_provider'=>$direct['provider'],'ai_warning'=>'','terms'=>[],'intent'=>'algemeen','archive_searched'=>false,'sources'=>[],'csrf'=>csrfToken()]);
     }
-    $searchQuestion=$classification!==null&&$classification['search_query']!==''?$classification['search_query']:$question;
+    $searchQuestion=$financialQuestion?($vendorTerms?implode(' ',$vendorTerms):$question):($classification!==null&&$classification['search_query']!==''?$classification['search_query']:$question);
     $subjectTerms=assistantTerms($question);
     $terms=assistantTerms($searchQuestion);
-    foreach((array)($classification['search_terms']??[]) as $suggestedTerm)foreach(assistantTerms((string)$suggestedTerm) as $term){$terms[]=$term;}
+    if(!$financialQuestion)foreach((array)($classification['search_terms']??[]) as $suggestedTerm)foreach(assistantTerms((string)$suggestedTerm) as $term){$terms[]=$term;}
+    if($complaintQuestion)$terms=array_merge($terms,['melding','klacht','storing','defect','overlast']);
     $terms=array_slice(array_values(array_unique($terms)),0,12);
     if(!$terms)throw new SafeInputException('Gebruik in de vraag minimaal één duidelijk zoekwoord.');
     $scope=(string)($classification['scope']??((bool)preg_match('/\b(alles|chronologisch|chronologische|tijdlijn|compleet|volledig|correspondentie|dossier|onderzoek|rapport)\b/iu',$question)?'broad':'targeted'));
     $residenceIntent=(bool)preg_match('/\b(woont|wonen|huisnummer|nummer|appartement)\b/iu',$question);
     $chronologicalIntent=(bool)preg_match('/\b(chronologisch|chronologische|tijdlijn|volgorde)\b/iu',$question);
+    if($financialQuestion){
+        $sources=assistantFinancialDocumentSources($pdo,$question,$vendorTerms);
+        recordActivity($pdo,$user,'ai-vraag-gesteld','assistent','financiele-vraag','',mb_substr($question,0,300).' · '.count($sources).' bronnen');
+        $answer=$sources?'Ik vond '.count($sources).' financiële bron'.(count($sources)===1?'':'nen').'. Bekijk de passages en open de bron om bedragen en betaalstatus te controleren.':'Ik vond geen passende financiële bron. Controleer of de facturen, betalingen of grootboekbestanden zijn geüpload en geïndexeerd.';
+        $ai=null;$aiWarning='';
+        if($sources)try{$ai=aiProviderAnswer($question,$sources,'financieel');}catch(Throwable $providerError){$aiWarning='De gekozen AI-provider was niet beschikbaar; daarom worden alleen de lokale bronnen getoond.';}
+        if($ai!==null)$answer=$ai['text'];
+        assistantOut(['ok'=>true,'answer'=>$answer,'answer_kind'=>$ai===null?'sources':'ai','ai_provider'=>$ai['provider']??aiProviderStatus()['provider'],'ai_warning'=>$aiWarning,'terms'=>$terms,'intent'=>'financieel','archive_searched'=>true,'sources'=>$sources,'csrf'=>csrfToken()]);
+    }
     if($residenceIntent){
         $sources=assistantResidenceSources($pdo,$question,$terms);
         recordActivity($pdo,$user,'ai-vraag-gesteld','assistent','woonvraag','',mb_substr($question,0,300).' · '.count($sources).' databasebronnen');
@@ -303,6 +378,7 @@ try {
         $conditions[]='(d.Titel LIKE ? OR d.OrigineleNaam LIKE ? OR d.Tags LIKE ? OR d.Omschrijving LIKE ? OR ti.Tekst LIKE ?)';
         array_push($params,$like,$like,$like,$like,$like);
     }
+    if($explicitEmailFileSearch)$conditions[]="LOWER(d.OrigineleNaam) REGEXP '[.](eml|msg)$'";
     $sql='SELECT d.DocumentID,d.Titel,d.OrigineleNaam,d.Mimetype,d.Bron,d.ExterneUrl,d.Omschrijving,d.Documentdatum,d.AangemaaktOp,d.GewijzigdOp,m.Pad MapNaam,ti.Tekst,COALESCE(ti.Status,\'niet-geindexeerd\') IndexStatus FROM DocumentBibliotheek d JOIN DocumentMappen m ON m.MapID=d.MapID LEFT JOIN DocumentTekstIndex ti ON ti.DocumentID=d.DocumentID WHERE d.IsHuidig=1 AND d.VerwijderdOp IS NULL AND ('.implode(' OR ',$conditions).') LIMIT 600';
     $stmt=$pdo->prepare($sql);$stmt->execute($params);$rows=$stmt->fetchAll();
     $sources=[];
@@ -324,24 +400,26 @@ try {
         }
         $text=(string)($row['Tekst']??'');if($text==='')$text=(string)($row['Omschrijving']??'');
         $relevanceText=implode(' ',[(string)$row['Titel'],(string)$row['OrigineleNaam'],(string)$row['Omschrijving'],$text]);
-        $snippet=assistantSnippet($text,$terms,$scope==='broad'?3600:600);$contentDates=assistantContentDates($snippet);$titleDate=assistantTitleDate((string)$row['Titel'].' '.(string)$row['OrigineleNaam']);
+        $snippet=assistantSnippet($text,$terms,$scope==='broad'?3600:600);
+        $contentDates=assistantContentDates($snippet);$titleDate=assistantTitleDate((string)$row['Titel'].' '.(string)$row['OrigineleNaam']);
         $sourceDate=(string)($row['Documentdatum']?:($row['GewijzigdOp']?:$row['AangemaaktOp']));
         $indexStatus=(string)($row['IndexStatus']??'niet-geindexeerd');$contentQuality=in_array($indexStatus,['ocr-nodig','overgeslagen','mislukt','niet-geindexeerd'],true)?'inhoudsarm; controleer het brondocument handmatig':'';
         $sources[]=['kind'=>'document','id'=>(int)$row['DocumentID'],'title'=>(string)$row['Titel'],'filename'=>(string)$row['OrigineleNaam'],'mimetype'=>(string)$row['Mimetype'],'folder'=>(string)$row['MapNaam'],'source'=>(string)$row['Bron'],'external_url'=>(string)($row['ExterneUrl']??''),'pages'=>$pages,'best_page'=>$bestPage,'snippet'=>$snippet,'score'=>$score,'matched_terms'=>assistantMatchedTerms($relevanceText,$terms),'date'=>$sourceDate,'content_dates'=>$contentDates,'timeline_date'=>$titleDate??($contentDates[0]??$sourceDate),'timeline_date_kind'=>$titleDate!==null?'titel':($contentDates?'inhoud':'document'),'content_quality'=>$contentQuality];
     }
     $sources=array_merge($sources,assistantDatabaseSources($pdo,$terms),assistantEmailSources($pdo,$terms));
-    $sources=assistantContextualSources($sources,$subjectTerms);
+    if($explicitEmailFileSearch)$sources=array_values(array_filter($sources,static fn($source)=>(string)($source['kind']??'')==='document'&&preg_match('/\.'.preg_quote($emailFileExtension,'/').'$/iu',(string)($source['filename']??''))));
+    elseif($scope!=='broad')$sources=assistantContextualSources($sources,$subjectTerms);
     $sources=assistantDedupeSources($sources);
-    if($scope==='broad')$sources=assistantPruneBroadSources($sources,$terms);
+    if($scope==='broad'&&!$explicitEmailFileSearch)$sources=assistantPruneBroadSources($sources,$terms);
     $sources=assistantBalancedSources($sources,$scope==='broad'?80:24);
-    $emailCandidateCount=count(array_filter($sources,static fn($source)=>(string)($source['kind']??'')==='email'));
+    $emailCandidateCount=count(array_filter($sources,static fn($source)=>(string)($source['kind']??'')==='email'||preg_match('/\.(?:eml|msg)$/iu',(string)($source['filename']??''))));
     $selectionWarning='';
     if($classification!==null&&$sources&&$scope!=='broad'){
         try{$sources=aiProviderSelectRelevantSources($question,$sources,$scope==='broad'?36:12);}
         catch(Throwable $selectionError){$selectionWarning='De inhoudelijke bronselectie was tijdelijk niet beschikbaar; de resultaten zijn lokaal gefilterd.';}
     }
-    $sources=assistantBalancedSources($sources,$scope==='broad'?36:12);
-    if($scope==='broad')$sources=aiProviderBalanceSourcePhases($sources,36);
+    $sources=assistantBalancedSources($sources,$explicitEmailFileSearch?80:($scope==='broad'?36:12));
+    if($scope==='broad'&&!$explicitEmailFileSearch)$sources=aiProviderBalanceSourcePhases($sources,36);
     recordActivity($pdo,$user,'ai-vraag-gesteld','assistent','zoekvraag','',mb_substr($question,0,300).' · '.count($sources).' bronnen');
     $answer=$sources
         ? ($chronologicalIntent?'Ik heb '.count($sources).' relevante bronnen over “'.implode(', ',$terms).'” geordend op herkenbare datums in de passages. Als een passage geen datum bevat, wordt de documentdatum gebruikt. Controleer de tijdlijn aan de hand van de bron.':'Ik vond '.count($sources).' relevante bron'.(count($sources)===1?'':'nen').'. Bekijk de passages en open de bron om het antwoord te controleren.')
@@ -349,7 +427,7 @@ try {
     $ai=null;$aiWarning='';
     $emailCount=count(array_filter($sources,static fn($source)=>(string)($source['kind']??'')==='email'));
     $providerConfig=aiProviderConfig();
-    if($scope==='broad'&&$emailCandidateCount>0&&empty($providerConfig['include_email']))$aiWarning='Er zijn '.$emailCandidateCount.' mogelijke e-mailbron'.($emailCandidateCount===1?'':'nen').' gevonden, maar de inhoud is wegens de privacy-instelling niet door de AI geselecteerd of geanalyseerd. Schakel dit desgewenst bewust in via Instellingen → AI.';
+    if($emailCandidateCount>0&&empty($providerConfig['include_email']))$aiWarning='Er zijn '.$emailCandidateCount.' mogelijke e-mailbron'.($emailCandidateCount===1?'':'nen').' gevonden. De inhoud is wegens de privacy-instelling niet naar de AI-provider gestuurd. Schakel dit desgewenst bewust in via Instellingen → AI.';
     if($sources)try{$ai=aiProviderAnswer($question,$sources,$chronologicalIntent?'chronologisch':($scope==='broad'?'dossier':'zoeken'));}catch(Throwable $providerError){$aiWarning='De gekozen AI-provider was niet beschikbaar; daarom worden alleen de lokale bronnen getoond.';}
     if($ai!==null)$answer=$ai['text'];
     assistantOut(['ok'=>true,'answer'=>$answer,'answer_kind'=>$ai===null?'sources':'ai','ai_provider'=>$ai['provider']??aiProviderStatus()['provider'],'ai_warning'=>trim($classificationWarning.' '.$selectionWarning.' '.$aiWarning),'terms'=>$terms,'intent'=>$chronologicalIntent?'chronologisch':$scope,'archive_searched'=>true,'sources'=>$sources,'csrf'=>csrfToken()]);
