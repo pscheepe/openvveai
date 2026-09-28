@@ -12,10 +12,13 @@ wijzigt is niet aanwezig in versie 8.50-beta.** Deze gids beschrijft veilig
 gebruik van een algemene AI-chat als uitleg naast de STRATO-webpagina. Jij
 klikt zelf en controleert elke handeling. De daadwerkelijke installatie van
 8.50-beta heeft voor de serverstappen nog een technisch beheerder nodig die
-SSH gebruikt. Geef een AI nooit toegang tot je hosting-, e-mail-, database- of
+SSH gebruikt. De voorbeelden gaan uit van een nieuwe VvE, nieuw domein en lege
+database. Geef een AI nooit toegang tot je hosting-, e-mail-, database- of
 API-account.
 
 ## Zo gebruik je AI veilig als begeleider
+
+<!-- ***INSTRUCTIEVIDEO: link toevoegen zodra de video over AI-begeleiding beschikbaar is.*** -->
 
 Open [de STRATO-webhandleiding](INSTALLATIE_STRATO_WEB.md) in één tab en een
 AI-chat in een andere. Vraag de AI telkens om **één volgende handeling**. Deel
@@ -34,8 +37,8 @@ Kopieer deze startprompt in een AI-chat:
 > valt. Vraag nooit om wachtwoorden, API-sleutels, klantnummers,
 > persoonsgegevens of echte VvE-bestanden. Vertel duidelijk dat de huidige
 > bèta voor schema-installatie en het eerste beheerdersaccount SSH nodig
-> heeft. Gebruik fictieve testgegevens en verander niets in een
-> productie-installatie.
+> heeft. Gebruik fictieve testgegevens en wijzig geen bestaande bestanden of
+> gegevens.
 
 ## Werkwijze per stap
 
@@ -49,8 +52,8 @@ Kopieer deze startprompt in een AI-chat:
 4. **Bij een fout:** stuur alleen de fouttekst nadat je domeinen,
    gebruikersnamen, IP-adressen, paden en eventuele codes hebt verwijderd.
    Vraag om mogelijke oorzaken en hoe je veilig kunt controleren.
-5. **Stop bij twijfel over kosten, domeinen, bestaande databases of echte
-   gegevens.** Vraag eerst het VvE-bestuur of de hostingprovider.
+5. **Stop bij twijfel over kosten, domeinen, niet-lege mappen of databases.**
+   Vraag eerst het VvE-bestuur of de hostingprovider.
 6. **Stop als de begeleider SSH-commando’s nodig heeft.** Dat is een harde
    grens van de browserroute in bèta 8.50; laat het afronden door de beheerder
    uit [de technische handleiding](INSTALLATIE_TECHNISCH.md).

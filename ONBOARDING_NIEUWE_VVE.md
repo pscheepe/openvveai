@@ -8,6 +8,13 @@ dat iedere VvE haar eigen gegevens, database, bestanden en toegangsbeheer houdt.
 De AI-assistent is optioneel: de basiswebsite kan zonder externe AI-provider
 worden gebruikt.
 
+OpenVvE AI is open-sourcesoftware. Dat betekent dat de broncode beschikbaar is
+om te bekijken, te gebruiken, aan te passen en te delen volgens de voorwaarden
+van de meegeleverde AGPL-licentie. Bij gebruik via een netwerk gelden ook de
+broncodeverplichtingen uit die licentie. Open source betekent niet dat hosting,
+domeinregistratie of een AI-provider kosteloos zijn; die diensten kiest en
+betaalt de VvE zelf. Lees [LICENSE](LICENSE) en [DISCLAIMER](DISCLAIMER.md).
+
 ## Wat is nodig?
 
 Het eindresultaat is een website op het internet, bijvoorbeeld
@@ -25,8 +32,12 @@ Het eindresultaat is een website op het internet, bijvoorbeeld
 5. **Een e-mailadres**: minimaal één VvE-mailadres voor beheer en
    contactherstel. E-mailsynchronisatie vanuit de applicatie is optioneel en
    vraagt aanvullende mailboxinstellingen.
-6. **HTTPS/SSL**: versleutelde verbinding voor inloggen en websitegebruik.
-   Gebruik een certificaat dat voor het gekozen domein actief is.
+6. **HTTPS/SSL**: HTTPS versleutelt het verkeer tussen de browser van een
+   gebruiker en de website. Dat helpt inloggegevens en uitgewisselde informatie
+   onderweg te beschermen en voorkomt browserwaarschuwingen over een onveilige
+   verbinding. Hiervoor moet een actief SSL/TLS-certificaat bij het domein
+   horen. De provider kan een inbegrepen certificaat aanbieden; controleer dit
+   vóór je iets bestelt.
 7. **Een AI-account en API-verbinding (optioneel)**: alleen nodig als de VvE
    de externe AI-assistent wil gebruiken. De VvE maakt zelf een account/project
    bij een AI-provider, configureert facturering en grenzen en bewaart de
@@ -48,11 +59,34 @@ Het eindresultaat is een website op het internet, bijvoorbeeld
   8.50-beta vraagt daarnaast PHP-CLI via SSH om de installatie en het eerste
   beheerdersaccount af te ronden.
 - IMAP is optioneel en alleen nodig voor e-mailsynchronisatie.
+- Een kopie van back-ups buiten de hostingruimte, bijvoorbeeld op een door de
+  VvE beheerde NAS of een goed beveiligde VvE-computer. Zo blijft de VvE bij
+  uitval of verlies van het hostingaccount niet alleen afhankelijk van de
+  serverkopie.
 
-**Let op:** 8.50-beta is een testversie. Gebruik eerst fictieve gegevens in
-een afgeschermde testinstallatie. De browser-only route en een AI-installatiewizard
-zijn nog geen functies van deze versie. Zie ook [de status van de drie
+**Let op:** 8.50-beta is een testversie. De instructies hieronder gaan uit van
+een nieuwe VvE-installatie, een nieuw domein en een nieuwe lege database; ze
+veronderstellen geen bestaande website of bestaande VvE-installatie. Begin met
+fictieve gegevens. De browser-only route en een AI-installatiewizard zijn nog
+geen functies van deze versie. Zie ook [de status van de drie
 installatieroutes](#kies-een-van-de-drie-routes).
+
+### Waarom een aparte `private`-map?
+
+De `public`-map bevat webpagina’s die bezoekers mogen openen. De map `private`
+bevat onder andere database-instellingen, gebruikersinformatie, sessies,
+uploads en back-ups. Als die map via internet bereikbaar is, kunnen geheimen
+of VvE-documenten uitlekken. Daarom moet alleen `public` als website-map
+(document-root) zijn ingesteld; `private` en `install` moeten erbuiten staan.
+Dit is een noodzakelijke beveiligingsgrens, geen optionele mapindeling.
+
+### Instructievideo’s
+
+Bij de stappen komen korte instructievideo’s. De links worden toegevoegd zodra
+de video’s zijn gepubliceerd. De routegidsen markeren waar een bijbehorende
+video-link kan worden geplaatst.
+
+<!-- ***VIDEO_LINKS: voeg gepubliceerde URLs voor STRATO, mappen/upload, database en eerste login toe.*** -->
 
 ## Kies een van de drie routes
 

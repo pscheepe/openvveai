@@ -7,11 +7,12 @@ volg bij verschillen de actuele STRATO-pagina. Dit is geen kopie van een
 specifiek klantaccount.
 
 > **Status bèta 8.50:** je kunt hostinginstellingen en mappen via het web
-> inrichten, zoals in de eerdere VvE-installatie. De huidige schone bèta heeft
+> inrichten voor een nieuwe VvE met een nieuw domein en een lege database. De
+> huidige bèta heeft
 > echter geen volledige browserinstaller: zij gebruikt nu een lokaal
 > voorbereide instantie en PHP-opdrachten via SSH voor database-initialisatie
-> en de eerste beheerder. Sla die laatste stappen niet over en probeer geen
-> productiegegevens in een testdatabase te importeren.
+> en de eerste beheerder. De gids gaat niet uit van een bestaande website of
+> bestaande database.
 
 ## Eerst begrijpen wat je gaat inrichten
 
@@ -31,16 +32,19 @@ bij een AI-provider en een API-sleutel nodig.
   [installatieoverzicht](ONBOARDING_NIEUWE_VVE.md#technische-eisen-voor-versie-850-beta).
 - Een domein of subdomein dat bij de VvE hoort, toegang tot de STRATO-klantenlogin
   en toestemming om het domein en pakket namens de VvE te beheren.
-- Een lege, nieuwe MySQL/MariaDB-database; maak geen verbinding met de
-  bestaande productie-VvE-database.
+- Een lege, nieuwe MySQL/MariaDB-database voor deze nieuwe VvE.
 - Een VvE-e-mailadres, SFTP-programma zoals FileZilla, de bestanden van een
   schone OpenVvE-instantie en een veilige wachtwoordkluis.
 - Voor het afmaken van de huidige bèta: een technisch beheerder met SSH.
 
-Maak vóór wijzigingen een herstelbare back-up van wat al bestaat. Bestel geen
-hosting, SSL of andere betaalde dienst zonder besluit van het VvE-bestuur.
+Deze stappen gaan uit van een nieuwe installatie. Als de gekozen webmap of
+database al inhoud bevat, stop dan en stel vast waarom voordat je bestanden
+plaatst. Bestel geen hosting, SSL of andere betaalde dienst zonder besluit van
+het VvE-bestuur.
 
 ## Stap 1 — open het juiste hostingpakket
+
+<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor hosting en domein.*** -->
 
 1. Meld je aan bij de STRATO-klantenlogin.
 2. Kies het hostingpakket dat voor deze VvE is bedoeld.
@@ -52,6 +56,8 @@ STRATO legt de navigatie van de klantenlogin uit in
 
 ## Stap 2 — controleer PHP
 
+<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor PHP instellen.*** -->
+
 1. Open **Databases en webspace → PHP-versie instellen**.
 2. Kies PHP 8.4 als deze versie in het pakket beschikbaar is.
 3. Sla op en wacht tot STRATO de wijziging heeft toegepast.
@@ -62,6 +68,8 @@ Bekijk STRATO’s actuele schermbeelden en uitleg bij
 [PHP-instellingen wijzigen](https://www.strato.nl/faq/hosting/hoe-wijzig-ik-de-php-instellingen-in-mijn-pakket/).
 
 ## Stap 3 — maak een database voor deze VvE
+
+<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor een lege database maken.*** -->
 
 1. Open **Databases en webspace → Databasebeheer**.
 2. Klik **Database aanmaken** en kies MySQL of MariaDB, als de keuze wordt
@@ -104,6 +112,8 @@ en certificaattoewijzing in
 
 ## Stap 6 — maak de webmappen
 
+<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor mappen aanmaken.*** -->
+
 Maak via STRATO Webspace/File Manager als die in jouw pakket beschikbaar is,
 of via FileZilla met SFTP, deze structuur:
 
@@ -121,6 +131,8 @@ startmappen en het tonen van verborgen `.htaccess`-bestanden uit in
 [Zo gebruik je SSH/SFTP](https://www.strato.nl/faq/hosting/zo-gebruik-je-ssh-sftp/).
 
 ## Stap 7 — plaats de bestanden
+
+<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor bestanden uploaden en ordenen.*** -->
 
 In versie 8.50-beta wordt een lege instantie eerst met het projectscript
 voorbereid. Een beheerder met de technische route kan je de gegevensvrije
@@ -178,3 +190,15 @@ stappen hierboven genoemd worden:
 De afbeeldingen tonen STRATO-voorbeelden; je eigen paneel kan verschillen. Deel
 geen screenshots waarop klantnummer, wachtwoorden, API-sleutels, persoonlijke
 gegevens of actieve sessies zichtbaar zijn.
+
+### Voorbeelden uit de OpenVvE AI-demonstratie
+
+Ook schermbeelden van de openbare Demo A-installatie kunnen bij de uitleg van
+de applicatie zelf worden gebruikt. Neem daarvoor alleen schermen met
+demonstratiegegevens, controleer ieder beeld op namen, adressen en andere
+persoonlijke gegevens en vervaag die voordat het beeld wordt gepubliceerd.
+STRATO-accountschermen en OpenVvE-appschermen zijn verschillende onderdelen:
+STRATO-hulp hierboven illustreert hostinginstellingen; Demo A illustreert de
+app. Voeg de geselecteerde, gecontroleerde beelden toe aan
+`docs/installatiebeelden/` en link ze vanuit de bijbehorende stap zodra ze zijn
+gemaakt. Gebruik geen echte VvE- of bewonersgegevens.
