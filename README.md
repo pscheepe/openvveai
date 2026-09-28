@@ -40,10 +40,12 @@ Strato-account heeft toegang tot alle installaties. Het is geen afzonderlijk
 besturingssysteem of afzonderlijk hostingaccount per VvE. Voor onbetrouwbare
 beheerders met SFTP/PHP-toegang zijn afzonderlijke hostingaccounts nodig.
 
-De praktische voorbereiding en installatie per VvE staat in
-[ONBOARDING_NIEUWE_VVE.md](ONBOARDING_NIEUWE_VVE.md). Die gids beschrijft de
-huidige handmatige SSH-route; een webinstaller en release-ZIP zijn nog niet
-beschikbaar.
+De doelstelling, technische benodigdheden en drie installatieroutes staan in
+[ONBOARDING_NIEUWE_VVE.md](ONBOARDING_NIEUWE_VVE.md). Er is een technische
+SSH-route, een handmatige STRATO-webpaneelgids en een gids voor veilig gebruik
+van AI als stap-voor-stap vraagbaak. De laatste twee zijn geen zelfstandige
+webinstaller: versie 8.50-beta heeft voor de laatste installatiestappen nog
+SSH nodig. Een AI-wizard die hostinginstellingen zelf uitvoert bestaat nog niet.
 
 ## Wat is bewust leeg?
 
@@ -69,84 +71,18 @@ E-mail heeft nog geen accounts of wachtwoorden. Automatische back-ups staan uit.
 
 ## Nieuwe VvE voorbereiden
 
-De huidige installatie is handmatig; er is nog geen veilige webinstaller of
-kant-en-klaar installatie-ZIP. Maak eerst lokaal vanuit deze repository een
-gegevensvrije instantie. Daarvoor is Python 3 op de computer van de beheerder
-nodig:
+Begin bij [OpenVvE AI voorbereiden en installeren](ONBOARDING_NIEUWE_VVE.md).
+De volledige technische, STRATO en AI-begeleide routes zijn afzonderlijk
+beschreven:
 
-```sh
-python3 tools/create_instance.py \
-  --destination instances/demo-a \
-  --name 'Demo VvE A' \
-  --host demo-a.example.org
-```
+- [Technische installatie](INSTALLATIE_TECHNISCH.md)
+- [Handmatig via STRATO-webpaneel](INSTALLATIE_STRATO_WEB.md)
+- [Met AI stap voor stap](INSTALLATIE_MET_AI.md)
 
-Voer hetzelfde commando met een andere bestemming, naam en host uit voor een
-andere VvE.
-Het script weigert bestaande installaties te overschrijven. Kopieer nooit de
-`private`-map van A naar B: de installatie-ID en gebruikers horen bij één VvE.
-
-Structuur per installatie:
-
-```text
-demo-a/
-  .htaccess               standaard geen webtoegang
-  public/                 enige document-root van het subdomein
-  private/                configuratie, gebruikers, bestanden en sessies
-  install/                CLI-installatie en gegevensvrij schema
-```
-
-## Installatie op Strato
-
-Dezelfde technische eisen gelden bij een andere provider. Controleer vooraf of
-het gekozen pakket de ondersteunde PHP-versie, extensies, database, HTTPS,
-document-root en SSH/SFTP biedt. Strato's pakketopties en paneel kunnen wijzigen;
-controleer de actuele providerinstellingen voordat je bestelt of migreert.
-
-1. Maak voor deze VvE een eigen lege MySQL/MariaDB-database en eigen
-   toegangsgegevens. Bewaar host, databasenaam, gebruikersnaam en wachtwoord
-   veilig; zet ze niet in Git, e-mail of openbare ondersteuningstickets.
-2. Upload de gegenereerde instantie met SFTP, bijvoorbeeld naar
-   `/vve-platform/demo-a`. In Strato moet de document-root van het eigen
-   subdomein uitsluitend naar `/vve-platform/demo-a/public` wijzen.
-   Laat `private` en `install` daarbuiten. De extra `.htaccess`-bestanden blokkeren
-   toegang via alternatieve domeinverwijzingen. Controleer ook het Strato-masteradres.
-3. Kopieer op de server `private/config.example.php` naar `private/config.php`
-   en vul uitsluitend de nieuwe databasegegevens in. Houd private-bestanden op
-   0600 en mappen op 0700 waar de server dit ondersteunt. Gebruik nooit 0777.
-4. Voer via SSH vanuit de installatie uit:
-
-   ```sh
-   cd /pad/naar/vve-platform/demo-a
-   php install/create_admin.php
-   php install/install.php
-   php install/check.php
-   ```
-
-   Gebruik het PHP-CLI-commando dat bij de ingestelde runtime hoort. Het eerste
-   script vraagt interactief om een nieuw wachtwoord en slaat alleen de hash op.
-   Er is geen standaardlogin. De installer weigert iedere database die al tabellen
-   of views bevat. DDL is niet transactioneel: bij een mislukte import stopt de
-   installer. Controleer de oorzaak en gebruik vervolgens een nieuwe lege database;
-   importeer niet over de bestaande VvE-database heen.
-
-5. Controleer HTTPS, inloggen, een fictieve upload/download, zoeken, CRUD per module,
-   afmelden en de scheiding met een tweede VvE. Controleer dat `private/config.php`,
-   `install/schema.json` en bestanden onder `private/uploads` via HTTP niet bereikbaar zijn,
-   ook niet via het hoofddomein of Strato-masteradres.
-6. Maak daarna pas echte gebruikers of koppel eigen e-mail/AI-diensten.
-
-Getest met PHP 8.4. Benodigde PHP-extensies: PDO MySQL, mbstring, fileinfo,
-OpenSSL, ZIP, zlib en iconv. GD is nodig voor beeldverwerking.
-E-mailsynchronisatie vereist de PHP IMAP-extensie; beschikbaarheid verschilt per
-provider en pakket. De OpenAI-provider is optioneel en vraagt een eigen API-account
-en sleutel van de VvE. Uploadlimieten hangen ook af van `upload_max_filesize` en
-`post_max_size`.
-
-De applicatie voert de nieuwe schema-installatie buiten gewone webverzoeken uit.
-Gebruik indien de hosting dat toestaat een runtime-databasegebruiker met alleen
-SELECT, INSERT, UPDATE, DELETE en SHOW VIEW. Het lokaal geteste runtimepad werkt
-zonder CREATE, ALTER en DROP. Latere schemawijzigingen horen in aparte migraties.
+De STRATO-route linkt per scherm naar STRATO-help met actuele voorbeelden en
+screenshots. Alle drie beschrijven de huidige bèta en maken duidelijk welke
+stappen nog SSH vereisen. Voor een andere provider geldt dezelfde technische
+checklist; een veilige browserinstaller is toekomstig werk.
 
 ## Back-ups en herstel
 
