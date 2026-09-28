@@ -8,6 +8,42 @@ dat iedere VvE haar eigen gegevens, database, bestanden en toegangsbeheer houdt.
 De AI-assistent is optioneel: de basiswebsite kan zonder externe AI-provider
 worden gebruikt.
 
+## Doel en financiële afbakening
+
+OpenVvE AI gaat ervan uit dat de financiële administratie van de VvE door een
+extern beheerkantoor wordt verzorgd. Dat kantoor blijft verantwoordelijk voor
+onder meer het innen van eigenaarsbijdragen, het betalen van leveranciers en de
+volledige boekhouding. OpenVvE AI vervangt die dienstverlening of administratie
+niet.
+
+Het systeem is een aanvulling voor VvE-bestuurders: het helpt inzicht te krijgen
+in de staat en het onderhoud van gebouwen en andere activa, ondersteunt bij het
+voorbereiden van voorstellen voor verbetering en onderhoud en helpt de
+communicatie met bewoners te verbeteren. Financiële documenten kunnen als
+bronnen worden bewaard en doorzocht, maar dat maakt OpenVvE AI niet tot een
+boekhoudpakket of betalings- en incassosysteem.
+
+## Waarom deze handleiding STRATO gebruikt
+
+De stappen in deze handleiding zijn geschreven voor STRATO. Die keuze is
+gebaseerd op de relatief voordelige Europese hostingpakketten en Europese
+dataverwerking die STRATO beschrijft. Pakketprijzen, introductieaanbiedingen en
+verlengingstarieven veranderen; controleer daarom vóór aankoop de actuele totale
+kosten en voorwaarden op de [STRATO-kostenpagina](https://www.strato.nl/hosting/hosting-kosten/).
+Als persoonsgegevens bij STRATO worden verwerkt, regel dan ook de toepasselijke
+verwerkersovereenkomst en beoordeel de overige AVG-verplichtingen van de VvE.
+Hosting in de EU helpt bij de keuze van het juridische kader, maar maakt de
+installatie op zichzelf niet automatisch AVG-conform. Zie [STRATO's informatie
+over de AVG en verwerkersovereenkomst](https://www.strato.nl/faq/contract/vragen-over-de-verwerkersovereenkomst-en-de-nieuwe-eu-verordening-avg-gdpr/).
+
+Een andere hostingprovider kan technisch ook, maar deze handleiding werkt die
+installatie niet stap voor stap uit. De VvE-beheerder moet dan zelf controleren
+en inrichten dat de provider aan alle technische, beveiligings- en
+privacyvereisten voldoet. De installatievoorbeelden en scherminstructies hier
+gaan uit van STRATO. Een eventueel ingestelde AI-API is een afzonderlijke
+externe dienst; beoordeel daarvoor apart welke gegevens worden doorgestuurd en
+welke voorwaarden van de AI-provider gelden.
+
 OpenVvE AI is open-sourcesoftware. Dat betekent dat de broncode beschikbaar is
 om te bekijken, te gebruiken, aan te passen en te delen volgens de voorwaarden
 van de meegeleverde AGPL-licentie. Bij gebruik via een netwerk gelden ook de
@@ -20,9 +56,9 @@ betaalt de VvE zelf. Lees [LICENSE](LICENSE) en [DISCLAIMER](DISCLAIMER.md).
 Het eindresultaat is een website op het internet, bijvoorbeeld
 `beheer.jouwvve.nl`. Hiervoor heeft de VvE het volgende nodig:
 
-1. **Een hostingprovider**: een bedrijf dat een server en opslagruimte verhuurt
-   waarop de website en database draaien. STRATO is één voorbeeld; andere
-   hostingproviders kunnen ook, als ze aan de eisen hieronder voldoen.
+1. **Een STRATO-hostingpakket**: een hostingprovider verhuurt server- en
+   opslagruimte waarop de website en database draaien. Deze handleiding gebruikt
+   STRATO als standaard, omdat het een relatief voordelige Europese aanbieder is.
 2. **Een domeinnaam**: het internetadres waarmee gebruikers de website openen.
    De VvE registreert een domein of maakt een subdomein aan bij de provider.
 3. **Webruimte met PHP**: de plaats waar de websitebestanden staan. Het domein
@@ -91,7 +127,8 @@ video-link kan worden geplaatst.
 ## Kies een van de drie routes
 
 1. [Technische installatie](INSTALLATIE_TECHNISCH.md) — voor iemand die
-   comfortabel is met lokale Python en serverterminal/SSH.
+   comfortabel is met lokale Python en serverterminal/SSH; ook deze route
+   gebruikt STRATO als hostingvoorbeeld.
 2. [Handmatig via STRATO-webpaneel](INSTALLATIE_STRATO_WEB.md) — laat zien
    hoe je domein, PHP, database, e-mail en SSL via het webpaneel inricht en
    bestanden/mappen met SFTP beheert. De stappen tot aan de eerste
@@ -102,6 +139,6 @@ video-link kan worden geplaatst.
    de handelingen zelf uit. De AI-wizard die zelfstandig de installatie
    uitvoert bestaat nog niet.
 
-Voor hosting buiten STRATO gelden dezelfde functionele eisen; menunamen en
-schermen verschillen per provider. Zie [privacy- en
-veiligheidsdisclaimer](DISCLAIMER.md) en [supportgrenzen](SUPPORT.md).
+Een andere provider blijft mogelijk, maar de VvE-beheerder richt die zelfstandig
+in en controleert zelf de technische, beveiligings- en AVG-vereisten. Zie
+[privacy- en veiligheidsdisclaimer](DISCLAIMER.md) en [supportgrenzen](SUPPORT.md).

@@ -6,6 +6,15 @@ tonen screenshots van hun schermen. De vormgeving en menunamen kunnen wijzigen;
 volg bij verschillen de actuele STRATO-pagina. Dit is geen kopie van een
 specifiek klantaccount.
 
+OpenVvE AI vult de taken van het externe VvE-beheerkantoor aan; het verzorgt
+geen incasso van eigenaarsbijdragen, leveranciersbetalingen of volledige
+boekhouding. De handleiding kiest STRATO als standaard vanwege de relatief
+voordelige Europese hostingmogelijkheden. Bekijk vóór een bestelling de
+[actuele pakket- en verlengingskosten](https://www.strato.nl/hosting/hosting-kosten/).
+Bij verwerking van persoonsgegevens moet de VvE ook de toepasselijke
+verwerkersovereenkomst en overige AVG-verplichtingen regelen. Zie
+[STRATO's AVG-informatie](https://www.strato.nl/faq/contract/vragen-over-de-verwerkersovereenkomst-en-de-nieuwe-eu-verordening-avg-gdpr/).
+
 > **Status bèta 8.50:** je kunt hostinginstellingen en mappen via het web
 > inrichten voor een nieuwe VvE met een nieuw domein en een lege database. De
 > huidige bèta heeft
@@ -25,6 +34,10 @@ configuratie buiten het publieke deel van de website. HTTPS beschermt de
 verbinding. Een e-mailadres is nodig voor VvE-beheer; mailboxkoppeling en AI
 zijn optioneel. Als AI wordt aangezet, is daarnaast een eigen account/project
 bij een AI-provider en een API-sleutel nodig.
+
+Een andere provider is technisch mogelijk, maar valt buiten deze scherm-voor-
+schermroute. De VvE-beheerder moet daar zelf de gelijkwaardige PHP-, database-,
+HTTPS-, opslag-, toegangs- en privacy-inrichting controleren en uitvoeren.
 
 ## Benodigd vóór je begint
 

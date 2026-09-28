@@ -40,10 +40,15 @@ Strato-account heeft toegang tot alle installaties. Het is geen afzonderlijk
 besturingssysteem of afzonderlijk hostingaccount per VvE. Voor onbetrouwbare
 beheerders met SFTP/PHP-toegang zijn afzonderlijke hostingaccounts nodig.
 
-De doelstelling, technische benodigdheden en drie installatieroutes staan in
+OpenVvE AI ondersteunt VvE-bestuurders bij inzicht in gebouw en activa,
+onderhoud en bewonerscommunicatie. Het vervangt geen extern beheerkantoor voor
+bijdrage-incasso, leveranciersbetalingen of volledige boekhouding. De doelstelling,
+technische benodigdheden en drie STRATO-gerichte installatieroutes staan in
 [ONBOARDING_NIEUWE_VVE.md](ONBOARDING_NIEUWE_VVE.md). Er is een technische
 SSH-route, een handmatige STRATO-webpaneelgids en een gids voor veilig gebruik
-van AI als stap-voor-stap vraagbaak. De laatste twee zijn geen zelfstandige
+van AI als stap-voor-stap vraagbaak. STRATO is de standaardroute vanwege de
+relatief voordelige Europese hostingmogelijkheden; andere providers vergen
+zelfstandige inrichting door de VvE-beheerder. De laatste twee zijn geen zelfstandige
 webinstaller: versie 8.50-beta heeft voor de laatste installatiestappen nog
 SSH nodig. Een AI-wizard die hostinginstellingen zelf uitvoert bestaat nog niet.
 
@@ -81,8 +86,10 @@ beschreven:
 
 De STRATO-route linkt per scherm naar STRATO-help met actuele voorbeelden en
 screenshots. Alle drie beschrijven de huidige bèta en maken duidelijk welke
-stappen nog SSH vereisen. Voor een andere provider geldt dezelfde technische
-checklist; een veilige browserinstaller is toekomstig werk.
+stappen nog SSH vereisen. Een andere provider is technisch mogelijk, maar de
+VvE-beheerder richt die zelfstandig in en toetst die aan de vereisten; deze
+handleiding geeft daarvoor geen aparte scherm-voor-schermroute. Een veilige
+browserinstaller is toekomstig werk.
 
 ## Back-ups en herstel
 

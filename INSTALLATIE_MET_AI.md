@@ -1,9 +1,12 @@
 # Route 3 — installatie met AI als stap-voor-stap gids
 
-Deze route is bedoeld voor iemand die de handelingen zelf in STRATO of bij een
-andere hoster uitvoert en tijdens elke stap uitleg en vraag-en-antwoord wil.
+Deze route is bedoeld voor iemand die de handelingen zelf in STRATO uitvoert en
+tijdens elke stap uitleg en vraag-en-antwoord wil. Een andere hostingprovider
+is technisch mogelijk, maar de VvE-beheerder moet die zelfstandig inrichten en
+controleren; de stappen en schermnamen hier zijn op STRATO gericht.
 Voor doel, benodigdheden en betekenis van hosting, domein, database, e-mail en
-API-account, begin bij [het installatieoverzicht](ONBOARDING_NIEUWE_VVE.md).
+API-account, plus de afbakening met de financiële administratie, begin bij
+[het installatieoverzicht](ONBOARDING_NIEUWE_VVE.md).
 
 ## Belangrijke status
 

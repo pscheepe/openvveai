@@ -6,7 +6,12 @@ definities en algemene benodigdheden, begin bij
 [OpenVvE AI voorbereiden en installeren](ONBOARDING_NIEUWE_VVE.md).
 
 De stappen hieronder zijn de huidige, door de broncode ondersteunde route voor
-versie 8.50-beta. Maak altijd een aparte installatie en lege database per VvE.
+versie 8.50-beta en gebruiken STRATO als uitgangspunt. De handleiding is geen
+configuratieplan voor andere providers; de VvE-beheerder moet daar zelf de
+gelijkwaardige eisen controleren en inrichten. OpenVvE AI vult het externe
+beheerkantoor aan en vervangt geen bijdrage-incasso, leveranciersbetalingen of
+volledige boekhouding. Maak altijd een aparte installatie en lege database per
+VvE.
 
 ## 1. Maak lokaal een schone instantie
 
@@ -27,7 +32,7 @@ meer `public`, `private` en `install`. Deel de `private`-map nooit tussen VvE's.
 
 ## 2. Maak hostingvoorzieningen aan
 
-Maak bij de provider een domein/subdomein, PHP-webruimte, een nieuwe lege
+Maak in STRATO een domein/subdomein, PHP-webruimte, een nieuwe lege
 MySQL/MariaDB-database en een eigen databasegebruiker aan. Activeer HTTPS.
 Bewaar databasehost, database, gebruikersnaam en wachtwoord in een VvE-
 wachtwoordkluis, nooit in Git of een chat. Zie de STRATO-stappen in
