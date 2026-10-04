@@ -4,20 +4,29 @@ require_once __DIR__.'/tenant.php';
 
 function instructionVideos(): array {
     return [
-        'login-contacten' => ['title'=>'Inloggen en contacten', 'file'=>'Login en Contacten.mp4'],
+        'login-contacten' => ['title'=>'Inloggen en contacten', 'file'=>'OpenVvEAI Login en Contacten.mp4'],
         'relaties' => ['title'=>'Relaties', 'file'=>'Relaties.mp4'],
         'activa-onderhoud' => ['title'=>'Activa en onderhoudsplannen', 'file'=>'Activa en Onderhoudsplannen.mp4'],
         'vergaderingen' => ['title'=>'Vergaderingen', 'file'=>'Vergaderingen.mp4'],
         'sleutels' => ['title'=>'Sleutels', 'file'=>'Sleutels.mp4'],
         'bestanden' => ['title'=>'Bestanden', 'file'=>'Bestanden.mp4'],
         'assistent' => ['title'=>'Assistent', 'file'=>'Assistent.mp4'],
+        'projecten' => ['title'=>'Projecten', 'file'=>'Projecten.mp4'],
+        'instellingen' => ['title'=>'Instellingen', 'file'=>'Instellingen.mp4'],
     ];
 }
 
 function instructionVideoPath(string $key): string {
     $video=instructionVideos()[$key]??null;
     if(!$video)throw new RuntimeException('Onbekende instructievideo.');
-    return uploadDirectory('instructies').DIRECTORY_SEPARATOR.$video['file'];
+    // All VvE installations under the same hosting root share this protected
+    // library; video streaming itself still passes through instruction_video.php.
+    $sharedRoot=dirname(__DIR__,2).DIRECTORY_SEPARATOR.'instructies';
+    if(is_link($sharedRoot))throw new RuntimeException('Gedeelde instructiemap mag geen symbolische link zijn.');
+    if(!is_dir($sharedRoot)&&!mkdir($sharedRoot,0700,true)&&!is_dir($sharedRoot))throw new RuntimeException('Gedeelde instructiemap ontbreekt.');
+    $root=realpath($sharedRoot);
+    if($root===false)throw new RuntimeException('Gedeelde instructiemap ontbreekt.');
+    return $root.DIRECTORY_SEPARATOR.$video['file'];
 }
 
 function renderInstructionMenu(): void {
