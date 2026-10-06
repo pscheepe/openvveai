@@ -15,9 +15,11 @@ documentatie, logo's en video's. Dit is vastgelegd in `README.md` en
 
 De meegeleverde `smalot/pdfparser` blijft onder LGPL-3.0; de licentietekst en
 kennisgeving zijn aanwezig in `COPYING.LESSER`, `THIRD_PARTY_NOTICES.md` en de
-bibliotheekmap. De gebruikte AI-dienst is niet vastgelegd in de beschikbare
-projectbestanden. Controleer de voorwaarden van de daadwerkelijk gebruikte
-dienst als aanvullende rechtenonderbouwing nodig is.
+bibliotheekmap. De maker heeft aangegeven dat het logo is gemaakt met ChatGPT
+5.6 Sol. Die modelvermelding documenteert de herkomst; de gekozen AGPL-3.0-only
+licentie bepaalt de voorwaarden waaronder het logo met de projectbestanden
+wordt hergebruikt. De licentie van de software wordt niet bepaald door de
+gebruikte AI-dienst.
 
 ## Naam en logo
 
