@@ -58,9 +58,12 @@ Geen bestaande contacten, adressen, documenten, e-mails, documentteksten,
 zoekindexen, activiteiten, gebruikers, wachtwoorden, API-sleutels of back-ups
 zijn overgenomen. Geen Git-historie, oude ZIP's, SQL-dumps of bronanalyses worden
 meegeleverd. De naam, het adres, het logo en specifieke MJOP-documentkoppelingen
-van de oorspronkelijke VvE zijn verwijderd. Oude instructieopnames zijn niet
-overgenomen: die kunnen VvE-gegevens op het scherm of in de gesproken tekst bevatten.
-De videofunctie blijft beschikbaar voor nieuwe, neutrale instructievideo's.
+van de oorspronkelijke VvE zijn verwijderd. De negen huidige productinstructies
+staan in `instructies/` en worden met Git LFS opgeslagen; Git LFS moet zijn
+geïnstalleerd om de videobestanden bij een nieuwe clone op te halen. De oude
+opnames uit de oorspronkelijke VvE-omgeving zijn niet opgenomen. Controleer de
+huidige video's volledig op herkenbare gegevens, portretrechten en rechten op
+beeld en geluid voordat de repository openbaar wordt.
 
 De lege database bevat alleen de structuur. De installer voegt één installatie-ID
 en algemene namen van gebouwelementen toe, zonder oude documenten of paginanummers.
@@ -130,6 +133,10 @@ verantwoordelijkheden staan in [DISCLAIMER.md](DISCLAIMER.md) en [SUPPORT.md](SU
 Deze projectteksten zijn geen juridisch advies. Controleer vóór een publieke
 release of de rechthebbenden toestemming hebben gegeven voor de uitgave en of
 alle gebruikte logo's en overige onderdelen juist zijn gelicentieerd.
+De bron en rechtenstatus van de gebruikte logo-bestanden en de licentie voor
+de instructievideo's zijn nog niet met bewijs vastgelegd. Zie
+[`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md) voor de
+resterende controles vóór openbaarmaking.
 
 ## Controles
 
