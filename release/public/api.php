@@ -135,7 +135,9 @@ try {
     if ($action === 'list') {
         $q=trim((string)($_GET['q']??''));
         $status=trim((string)($_GET['status']??'active'));
-        out(['ok'=>true,'entity'=>$entity,'rows'=>listRows($pdo,$map[$entity],$q,$status)]);
+        $rows=listRows($pdo,$map[$entity],$q,$status);
+        if($entity==='contacts' && isset($map['addresses'])) $rows=attachContactAddresses($pdo,$map,$rows);
+        out(['ok'=>true,'entity'=>$entity,'rows'=>$rows]);
     }
     if ($action === 'get') {
         $id=trim((string)($_GET['id']??''));
@@ -609,6 +611,39 @@ function listRows(PDO $p,string $t,string $q,string $status='active'): array {
         $where[]='TRIM(CAST('.qi($statusCol).' AS CHAR)) = ?'; $params[]=$status;
     }
     if($where)$sql.=' WHERE '.implode(' AND ',$where);if($status!=='__all__')$sql.=' LIMIT 500';$s=$p->prepare($sql);$s->execute($params);return$s->fetchAll();
+}
+
+function attachContactAddresses(PDO $p,array $map,array $rows): array {
+    if(!$rows)return $rows;
+    $addressTable=$map['addresses'];$addressCols=columns($p,$addressTable);
+    $contactRef=findCol($addressCols,['ContactID','contact_id']);$residentRef=findCol($addressCols,['Bewoner_ContactID','bewoner_contact_id']);$keyholderCol=actualCol($addressCols,'NaamSleutelhouder');
+    $addressFields=[];foreach(['AdresSoort','NaamSleutelhouder','Straat','Huisnummer','Postcode','Woonplaats','Hal','Etage','Postbus','Land','EmailPrive','EmailWerk','Email','TelefoonHuis','TelefoonWerk','Telefoon','Mobiel','Fax'] as $candidate){$actual=actualCol($addressCols,$candidate);if($actual)$addressFields[]=$actual;}
+    $addresses=$p->query('SELECT * FROM '.qi($addressTable))->fetchAll(PDO::FETCH_ASSOC);$byContact=[];$byKeyholder=[];
+    foreach($addresses as $address){$parts=[];
+        foreach(['AdresSoort'=>'Soort adres','NaamSleutelhouder'=>'Sleutelhouder','Straat'=>'Straat','Huisnummer'=>'Huisnummer','Postcode'=>'Postcode','Woonplaats'=>'Woonplaats','Hal'=>'Hal','Etage'=>'Etage','Postbus'=>'Postbus','Land'=>'Land','EmailPrive'=>'E-mail privé','EmailWerk'=>'E-mail werk','Email'=>'E-mail','TelefoonHuis'=>'Telefoon huis','TelefoonWerk'=>'Telefoon werk','Telefoon'=>'Telefoon','Mobiel'=>'Mobiel','Fax'=>'Fax'] as $candidate=>$title){$field=actualCol($addressCols,$candidate);$value=$field?trim((string)($address[$field]??'')):'';if($value!=='')$parts[]=$title.': '.$value;}
+        $label=implode(' · ',$parts);if($label==='')continue;
+        $linkedIds=array_unique(array_filter([$contactRef?$address[$contactRef]??null:null,$residentRef?$address[$residentRef]??null:null],static fn($v)=>$v!==null&&$v!==''&&$v!=='0'));
+        foreach($linkedIds as $id)$byContact[(string)$id][]=$label;
+        $keyholder=$keyholderCol?trim((string)($address[$keyholderCol]??'')):'';if($keyholder!=='')$byKeyholder[keyNorm($keyholder)][]=$label;
+    }
+    $contactPk=primaryKey($p,$map['contacts'],'contacts');$contactCols=columns($p,$map['contacts']);$contactInfoFields=[];
+    foreach(['EmailPrive'=>'E-mail privé','EmailWerk'=>'E-mail werk','Email'=>'E-mail','TelefoonHuis'=>'Telefoon huis','TelefoonWerk'=>'Telefoon werk','Telefoon'=>'Telefoon','Mobiel'=>'Mobiel'] as $candidate=>$title){$actual=actualCol($contactCols,$candidate);if($actual)$contactInfoFields[$actual]=$title;}
+    $fallbackFields=[];foreach(['Straat'=>'Straat','Huisnummer'=>'Huisnummer','Postcode'=>'Postcode','Woonplaats'=>'Woonplaats','Hal'=>'Hal','Etage'=>'Etage'] as $candidate=>$title){$actual=actualCol($contactCols,$candidate);if($actual)$fallbackFields[$actual]=$title;}
+    foreach($rows as &$row){
+        $id=(string)($row[$contactPk]??'');$labels=array_values(array_unique($byContact[$id]??[]));
+        $salutation=actualCol($contactCols,'Aanhef');$firstName=actualCol($contactCols,'VoorNaam');$middleName=actualCol($contactCols,'Tussenvoegsel');$lastName=actualCol($contactCols,'AchterNaam');
+        $fullNameWithSalutation=implode(' ',array_filter(array_map(static fn($field)=>trim((string)($field?$row[$field]??'':'')),[$salutation,$firstName,$middleName,$lastName])));
+        $fullName=implode(' ',array_filter(array_map(static fn($field)=>trim((string)($field?$row[$field]??'':'')),[$firstName,$middleName,$lastName])));
+        $shortName=implode(' ',array_filter(array_map(static fn($field)=>trim((string)($field?$row[$field]??'':'')),[$firstName,$lastName])));
+        foreach(array_unique(array_filter([$fullNameWithSalutation,$fullName,$shortName])) as $candidate)$labels=array_merge($labels,$byKeyholder[keyNorm($candidate)]??[]);
+        $labels=array_values(array_unique($labels));$contactDetails=[];
+        foreach($contactInfoFields as $field=>$title){$value=trim((string)($row[$field]??''));if($value!=='')$contactDetails[]=$title.': '.$value;}
+        if(!$labels){$parts=[];foreach($fallbackFields as $field=>$title){$value=trim((string)($row[$field]??''));if($value!=='')$parts[]=$title.': '.$value;}if($parts)$labels[]=implode(' · ',$parts);}
+        if($labels&&$contactDetails){foreach($labels as &$addressLabel){$extra=[];foreach($contactDetails as $detail){$value=explode(': ',$detail,2)[1]??$detail;if($value!==''&&!str_contains($addressLabel,$value))$extra[]=$detail;}if($extra)$addressLabel.=' · '.implode(' · ',$extra);}unset($addressLabel);}
+        elseif(!$labels&&$contactDetails)$labels[]=implode(' · ',$contactDetails);
+        $row['_contact_addresses']=implode("\n\n",$labels);
+    }unset($row);
+    return $rows;
 }
 
 function getRow(PDO $p,string $t,string $e,string $id): ?array { $k=primaryKey($p,$t,$e);$s=$p->prepare('SELECT * FROM '.qi($t).' WHERE '.qi($k).'=? LIMIT 1');$s->execute([$id]);$r=$s->fetch();return$r?:null; }
