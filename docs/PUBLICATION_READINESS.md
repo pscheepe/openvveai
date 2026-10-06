@@ -1,107 +1,90 @@
 # Voorbereiding op openbare publicatie
 
-Beoordeeld op 6 oktober 2026. Dit document legt vast wat in de repository is
-nagekeken en welke punten nog openstaan. Het is geen juridisch advies,
-penetratietest of garantie dat alle auteursrechten zijn vastgesteld.
+Beoordeeld op 6 oktober 2026. Dit document legt vast wat is nagekeken en welke
+beperkingen overblijven. Het is geen juridisch advies, penetratietest of
+garantie dat alle rechten onafhankelijk zijn vastgesteld.
 
-## Bevindingen
+## Rechten en licenties
 
-### Software en licenties
+De maker heeft bevestigd dat de eigen projectcode, documentatie, het met AI
+gemaakte logo en de zelfgemaakte instructievideo's mogen worden gepubliceerd.
+Voor het logo en de video's is uitsluitend fictieve demo-inhoud gebruikt. De
+maker heeft gekozen voor AGPL-3.0-only voor de oorspronkelijke projectcode,
+documentatie, logo's en video's. Dit is vastgelegd in `README.md` en
+`THIRD_PARTY_NOTICES.md`.
 
-- De eigen applicatiecode wordt in `README.md` aangeduid als AGPL-3.0-only.
-- De meegeleverde `smalot/pdfparser` heeft een eigen LGPL-3.0-licentie. De
-  licentietekst en kennisgeving zijn aanwezig in `COPYING.LESSER`,
-  `THIRD_PARTY_NOTICES.md` en de bibliotheekmap.
-- Een licentie op de programmatuur geeft niet automatisch rechten op logo's,
-  video's, portretten, muziek of andere werken. Voor publicatie moet ook voor
-  die onderdelen de maker, bron en toegestane licentie zijn vastgelegd.
+De meegeleverde `smalot/pdfparser` blijft onder LGPL-3.0; de licentietekst en
+kennisgeving zijn aanwezig in `COPYING.LESSER`, `THIRD_PARTY_NOTICES.md` en de
+bibliotheekmap. De gebruikte AI-dienst is niet vastgelegd in de beschikbare
+projectbestanden. Controleer de voorwaarden van de daadwerkelijk gebruikte
+dienst als aanvullende rechtenonderbouwing nodig is.
 
-### Logo
+## Naam en logo
 
-De applicatie bevat `templates/logo.svg`, `templates/logo.png`,
-`release/public/logo.svg` en `release/public/logo.png`. De SVG-versies bevatten
-een ingesloten afbeelding. De maker heeft verklaard het logo samen met AI te
-hebben gemaakt en de rechten te bezitten. De bestanden hebben geen bruikbare
-auteursrechtmetadata; de Git-geschiedenis toont alleen de initiële
-repository-import. De verklaring van de maker is de beschikbare
-rechtenonderbouwing. Leg daarnaast vast welke AI-dienst is gebruikt en controleer
-de voorwaarden daarvan en of de afbeelding niet sterk lijkt op een bestaand
-logo. Als ChatGPT/OpenAI is gebruikt, wijzen de huidige voorwaarden de output
-tussen OpenAI en de gebruiker aan de gebruiker toe voor zover de wet dat
-toestaat; ze waarschuwen ook dat output niet uniek hoeft te zijn.
+De naam is opgezocht in TMview; voor “OpenVvE AI” en “OpenVvE” werden geen
+treffers gevonden. De officiële BOIP-controle kon niet worden voltooid doordat
+de dienst niet beschikbaar was en het register een beveiligingsbarrière toonde.
+Een zoekactie is geen garantie dat een naam vrij is. Auteursrecht, handelsnaam
+en merkregistratie zijn afzonderlijke vragen. Een onafhankelijke visuele
+vergelijking van het logo met andere merken is niet afgerond. De logo-bestanden
+hebben geen bruikbare auteursrechtmetadata; de rechtenverklaring van de maker is
+de beschikbare onderbouwing.
 
-De grote variant `OpenVvE AI logo groot.png` staat momenteel buiten versiebeheer
-en is niet klaargezet voor upload. Een controle in het Benelux Merkenregister is
-niet uitgevoerd; auteursrecht en merkregistratie zijn afzonderlijke vragen.
-Leg vast of het logo onder AGPL-3.0-only mag worden hergebruikt of een aparte
-merk-/beeldrichtlijn krijgt. Het softwarelicentiebestand noemt specifiek de
-programmatuur; daardoor is de bedoeling voor beeldmateriaal nu niet expliciet.
+De losse grote variant `OpenVvE AI logo groot.png` is niet opgenomen in deze
+release. De versiebeheerde logo's staan bij de applicatie.
 
-### Instructievideo's
+## Instructievideo's
 
 De app verwijst naar negen bestanden met vaste namen in `instructies/`. De
-bestanden zijn H.264/AVC-video's en samen ongeveer 500 MB. Daarom worden ze met
-Git LFS bijgehouden; `.htaccess` blokkeert rechtstreekse webtoegang tot de map.
-GitHub begrenst gewone Git-bestanden op 100 MiB en raadt Git LFS aan voor zulke
-binaire bestanden. GitHub Free bevat momenteel 10 GiB LFS-opslag en 10 GiB
-bandbreedte per factureringsperiode. Veel downloads kunnen die bandbreedte
-verbruiken.
+bestanden zijn samen ongeveer 500 MB en staan onder Git LFS; `.htaccess` blokkeert
+rechtstreekse webtoegang tot die map. Nieuwe clones moeten Git LFS installeren
+en de LFS-objecten ophalen. Houd rekening met GitHub-opslag- en
+bandbreedtelimieten.
 
-De maker heeft bevestigd dat hij de video's zelf heeft gemaakt en uitsluitend
-fictieve demo-gegevens heeft gebruikt. De volledige beeld- en geluidsinhoud kon
-in deze werkomgeving niet worden afgespeeld of als frames worden uitgelezen; de
-inhoudelijke controle is dus gebaseerd op die verklaring en niet onafhankelijk
-uitgevoerd. Controleer zo nodig op herkenbare personen, muziek, lettertypes of
-andere onderdelen van derden en vraag daarvoor toestemming als dat van toepassing
-is.
+De maker heeft bevestigd de video's zelf te hebben gemaakt, uitsluitend
+fictieve demo-gegevens te gebruiken en ze onder AGPL-3.0-only beschikbaar te
+stellen. De volledige beeld- en geluidsinhoud is hier niet onafhankelijk
+gecontroleerd. Herkenbare personen, muziek, lettertypes of andere werken van
+derden moeten afzonderlijk worden gecontroleerd en zo nodig vrijgegeven.
 
-De maker heeft verklaard de rechten op de video's te bezitten. Nog te kiezen is
-of hergebruik van de video's onder AGPL-3.0-only valt, of dat een aparte
-Creative-Commons-licentie geldt. De bestaande README beperkt de AGPL-aanduiding
-tot de projectcode; maak de reikwijdte expliciet voordat de repository openbaar
-wordt.
+## Bestanden buiten de release
 
-### Overige bestanden
+Oudere patchmappen, `package-dropdown-fix/`, `OLLAMA_DEMO_B.md`, installatie-
+PDF-kopieën, een losse grote logo-variant en `index.php` blijven buiten de
+release. Ze zijn niet inhoudelijk beoordeeld op actualiteit, persoonlijke
+gegevens, serveradressen of rechten. De Markdown-handleidingen in versiebeheer
+zijn de bronbestanden. De persoonlijke Ollama-notities bevatten details van de
+thuisomgeving en worden niet gepubliceerd.
 
-De huidige commit bevat de onderhouden applicatie, documentatie, security-
-reviews, licentiebestanden, tests en (na de video-upload) de negen instructie-
-video's. Niet klaargezet voor publicatie zijn onder meer oudere patchmappen,
-`package-dropdown-fix/`, de grote logo-variant, `OLLAMA_DEMO_B.md`, lokale
-installatie-PDF's en `index.php`. Deze bestanden zijn niet inhoudelijk
-gecontroleerd op verouderde code, privégegevens, serveradressen of rechten en
-horen pas in een aparte review thuis. De Markdown-installatiehandleidingen die
-al versiebeheerd zijn, blijven de bronversies; de niet-getrackte PDF's kunnen
-verouderde kopieën zijn.
+## Secretscan en beveiligingsreview
 
-### Beveiliging en repositoryhygiëne
+De volledige aanwezige Git-geschiedenis en de huidige werkmap zijn met Gitleaks
+gescand. De enige treffer was een vaste, openbare RFC 6238-TOTP-testvector in
+`tests/test_mfa.php`, geen accountgeheim. Die is in de bron als testfixture
+gemarkeerd. `.gitleaksignore` onderdrukt uitsluitend deze historische treffer
+op basis van zijn exacte fingerprint; andere meldingen blijven zichtbaar.
 
-De bestaande `docs/SECURITY_REVIEW_GITHUB.md` is een statische review. Die noemt
-onder andere aandachtspunten rond back-uptokens, gevoelige volledige back-ups
-en de grens van één hostingaccount. Het is geen onafhankelijke audit of
-penetratietest. Controleer voor publicatie of die bevindingen duidelijk als
-bekende beperkingen zijn beschreven en voer een secretscan uit over de volledige
-Git-geschiedenis. Verwijder gevonden geheimen ook uit de geschiedenis en roteer
-ze; alleen verwijderen in de huidige werkmap is onvoldoende.
+`docs/SECURITY_REVIEW_GITHUB.md` is een statische code-review, geen onafhankelijke
+audit of penetratietest. Daarin staan onder meer risico's rond back-uptokens,
+gevoelige volledige back-ups en de hostingaccountgrens. Een live deployment,
+providerconfiguratie en geïsoleerde database-integratietest zijn niet door deze
+publicatievoorbereiding gevalideerd.
 
-## Controlelijst vóór openbaarmaking
+## Controlelijst
 
-1. Bevestig dat alle codebijdragen mogen worden uitgegeven onder de genoemde
-   licentie en dat de AGPL-versie exact overeenkomt met de projectkeuze.
-2. Leg de verklaring vast dat de maker het logo met AI heeft gemaakt. Noteer
-   welke AI-dienst is gebruikt, controleer de toepasselijke voorwaarden en
-   onderzoek eventueel het Benelux Merkenregister op verwarring met bestaande
-   merken.
-3. Leg de keuze vast of logo en video's onder AGPL-3.0-only of onder een aparte
-   licentie worden verspreid. Controleer eventuele onderdelen van derden in de
-   video's en regel daarvoor zo nodig toestemming.
-4. Voer een secretscan uit op alle branches en commits die openbaar worden.
-   Beoordeel ook de niet-getrackte patch-, demo- en installatiebestanden apart.
-5. Werk daarna README, licentiekennisgevingen en release-instructies bij en
-   controleer een schone clone mét Git LFS. Test de gepubliceerde deployment
-   onder de bedoelde hostingprovider.
-6. Wijzig pas als laatste de repositoryzichtbaarheid. Dat is een aparte
-   publicatiestap; dit document of een gewone `git push` maakt de repository
-   niet openbaar.
+1. **Rechtenverklaring:** ontvangen van de maker voor eigen code, logo en
+   video's; dit is geen onafhankelijk juridisch oordeel.
+2. **Naam/logo:** eerste TMview-zoekactie zonder treffers; officiële BOIP- en
+   onafhankelijke beeldvergelijking bleven onvoltooid.
+3. **Licentie:** AGPL-3.0-only voor eigen projectcode, documentatie, logo's en
+   video's; LGPL-3.0 voor de meegeleverde PDF-parser.
+4. **Secretscan:** uitgevoerd over alle aanwezige Git-commits/refs en de
+   werkmap; de ene historische publieke testvector is per exacte fingerprint
+   gedocumenteerd en uitgesloten.
+5. **Releasevoorbereiding:** README en derde-partijkennisgeving bijgewerkt.
+   Zie [`RELEASING.md`](RELEASING.md) voor de clone- en LFS-checklist.
+6. **Zichtbaarheid:** repository blijft privé tot de releasechecks zijn
+   afgerond. Openbaar maken is een afzonderlijke laatste handeling.
 
 ## Bronnen
 

@@ -1,10 +1,11 @@
 # OpenVvE AI — zelf te hosten VvE-software
 
 OpenVvE AI is bedoeld als gratis open-source software voor VvE-beheer die
-gebruikers zelf kunnen installeren, beheren en aanpassen. De eigen
-projectcode valt onder de GNU Affero General Public License versie 3
-(AGPL-3.0-only); de meegeleverde PDF-parser behoudt zijn eigen LGPL-3.0-
-licentie. **Huidige versie: 8.50-beta.** Dit is een testversie; gebruik haar
+gebruikers zelf kunnen installeren, beheren en aanpassen. De oorspronkelijke
+projectcode, documentatie, instructievideo's en logo's vallen onder de GNU
+Affero General Public License versie 3 (AGPL-3.0-only). De meegeleverde
+PDF-parser behoudt zijn eigen LGPL-3.0-licentie; zie
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). **Huidige versie: 8.50-beta.** Dit is een testversie; gebruik haar
 eerst in een afgeschermde testinstallatie met fictieve gegevens. Lees ook de
 [disclaimer](DISCLAIMER.md), [supportgrenzen](SUPPORT.md)
 en [derdenkennisgevingen](THIRD_PARTY_NOTICES.md). De GitHub-repository kan
@@ -63,9 +64,10 @@ staan in `instructies/` en worden met Git LFS opgeslagen; Git LFS moet zijn
 geïnstalleerd om de videobestanden bij een nieuwe clone op te halen. De oude
 opnames uit de oorspronkelijke VvE-omgeving zijn niet opgenomen. Controleer de
 huidige video's zijn volgens de maker zelfgemaakt met fictieve demo-gegevens.
-De maker heeft ook bevestigd dat het logo met AI is gemaakt. Zie
+De maker heeft bevestigd het logo met AI te hebben gemaakt en heeft gekozen
+voor AGPL-3.0-only voor eigen logo's en video's. Zie
 [`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md) voor de
-licentieafspraak en resterende controles vóór openbaarmaking.
+vastgelegde verklaring en resterende controles.
 
 De lege database bevat alleen de structuur. De installer voegt één installatie-ID
 en algemene namen van gebouwelementen toe, zonder oude documenten of paginanummers.
@@ -134,10 +136,9 @@ supportdienst toegezegd, voor zover wettelijk toegestaan. De precieze grenzen en
 verantwoordelijkheden staan in [DISCLAIMER.md](DISCLAIMER.md) en [SUPPORT.md](SUPPORT.md).
 Deze projectteksten zijn geen juridisch advies. Controleer vóór een publieke
 release of de rechthebbenden toestemming hebben gegeven voor de uitgave en of
-alle gebruikte logo's en overige onderdelen juist zijn gelicentieerd.
-De maker heeft verklaard de logo's en instructievideo's zelf te hebben gemaakt;
-de exacte licentie voor hergebruik van die materialen moet nog worden vastgelegd.
-Zie
+alle gebruikte logo's en overige onderdelen juist zijn gelicentieerd. De maker
+heeft verklaard de logo's en instructievideo's zelf te hebben gemaakt en heeft
+gekozen voor AGPL-3.0-only voor deze eigen materialen. Zie
 [`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md) voor de
 resterende controles vóór openbaarmaking.
 

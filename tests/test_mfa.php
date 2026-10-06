@@ -4,7 +4,7 @@ $dir=sys_get_temp_dir().'/openvveai-mfa-'.bin2hex(random_bytes(5));mkdir($dir,07
 function tenantPrivateFile(string $name): string { global $dir; return $dir.'/'.$name; }
 require_once __DIR__.'/../release/public/mfa.php';
 function check(bool $ok,string $label): void { if(!$ok){fwrite(STDERR,"FAIL: $label\n");exit(1);} }
-$secret='GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ';
+$secret='GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'; // gitleaks:allow — public RFC 6238 test vector, not a credential.
 check(mfaCodeValid($secret,'287082',59),'RFC 6238 SHA-1 vector');
 check(!mfaCodeValid($secret,'287083',59),'reject incorrect TOTP');
 $step=mfaMatchedStep($secret,'287082',59);check($step===1,'return matched time step');

@@ -1,0 +1,2 @@
+# Public RFC 6238 TOTP test vector first added in this historical commit.
+3e1ddf80110d63c20ed9b0fac62a26997593f445:tests/test_mfa.php:generic-api-key:7
