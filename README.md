@@ -62,8 +62,10 @@ van de oorspronkelijke VvE zijn verwijderd. De negen huidige productinstructies
 staan in `instructies/` en worden met Git LFS opgeslagen; Git LFS moet zijn
 geïnstalleerd om de videobestanden bij een nieuwe clone op te halen. De oude
 opnames uit de oorspronkelijke VvE-omgeving zijn niet opgenomen. Controleer de
-huidige video's volledig op herkenbare gegevens, portretrechten en rechten op
-beeld en geluid voordat de repository openbaar wordt.
+huidige video's zijn volgens de maker zelfgemaakt met fictieve demo-gegevens.
+De maker heeft ook bevestigd dat het logo met AI is gemaakt. Zie
+[`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md) voor de
+licentieafspraak en resterende controles vóór openbaarmaking.
 
 De lege database bevat alleen de structuur. De installer voegt één installatie-ID
 en algemene namen van gebouwelementen toe, zonder oude documenten of paginanummers.
@@ -133,8 +135,9 @@ verantwoordelijkheden staan in [DISCLAIMER.md](DISCLAIMER.md) en [SUPPORT.md](SU
 Deze projectteksten zijn geen juridisch advies. Controleer vóór een publieke
 release of de rechthebbenden toestemming hebben gegeven voor de uitgave en of
 alle gebruikte logo's en overige onderdelen juist zijn gelicentieerd.
-De bron en rechtenstatus van de gebruikte logo-bestanden en de licentie voor
-de instructievideo's zijn nog niet met bewijs vastgelegd. Zie
+De maker heeft verklaard de logo's en instructievideo's zelf te hebben gemaakt;
+de exacte licentie voor hergebruik van die materialen moet nog worden vastgelegd.
+Zie
 [`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md) voor de
 resterende controles vóór openbaarmaking.
 

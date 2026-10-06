@@ -20,18 +20,22 @@ penetratietest of garantie dat alle auteursrechten zijn vastgesteld.
 
 De applicatie bevat `templates/logo.svg`, `templates/logo.png`,
 `release/public/logo.svg` en `release/public/logo.png`. De SVG-versies bevatten
-een ingesloten afbeelding. In de beschikbare bestanden en de Git-geschiedenis
-staat geen bron, maker, overdrachtsbewijs of licentie. De bestanden hebben geen
-bruikbare auteursrechtmetadata. De geschiedenis toont alleen dat de logo's in
-de initiële repository-import zijn opgenomen; dat bewijst geen eigendom of
-publicatierecht.
+een ingesloten afbeelding. De maker heeft verklaard het logo samen met AI te
+hebben gemaakt en de rechten te bezitten. De bestanden hebben geen bruikbare
+auteursrechtmetadata; de Git-geschiedenis toont alleen de initiële
+repository-import. De verklaring van de maker is de beschikbare
+rechtenonderbouwing. Leg daarnaast vast welke AI-dienst is gebruikt en controleer
+de voorwaarden daarvan en of de afbeelding niet sterk lijkt op een bestaand
+logo. Als ChatGPT/OpenAI is gebruikt, wijzen de huidige voorwaarden de output
+tussen OpenAI en de gebruiker aan de gebruiker toe voor zover de wet dat
+toestaat; ze waarschuwen ook dat output niet uniek hoeft te zijn.
 
 De grote variant `OpenVvE AI logo groot.png` staat momenteel buiten versiebeheer
-en is niet klaargezet voor upload. Publiceer de logo's pas nadat de maker en de
-rechten op alle beeld- en lettertypeonderdelen zijn bevestigd, en nadat is
-vastgelegd onder welke voorwaarden anderen het logo mogen gebruiken. Een
-controle in het Benelux Merkenregister is ook niet uitgevoerd; auteursrecht en
-merkregistratie zijn afzonderlijke vragen.
+en is niet klaargezet voor upload. Een controle in het Benelux Merkenregister is
+niet uitgevoerd; auteursrecht en merkregistratie zijn afzonderlijke vragen.
+Leg vast of het logo onder AGPL-3.0-only mag worden hergebruikt of een aparte
+merk-/beeldrichtlijn krijgt. Het softwarelicentiebestand noemt specifiek de
+programmatuur; daardoor is de bedoeling voor beeldmateriaal nu niet expliciet.
 
 ### Instructievideo's
 
@@ -43,19 +47,19 @@ binaire bestanden. GitHub Free bevat momenteel 10 GiB LFS-opslag en 10 GiB
 bandbreedte per factureringsperiode. Veel downloads kunnen die bandbreedte
 verbruiken.
 
-De volledige beeld- en geluidsinhoud kon in deze werkomgeving niet worden
-afgespeeld of als frames worden uitgelezen. Er is daarom geen inhoudelijke
-controle uitgevoerd op namen, adressen, e-mail, VvE-documenten, accounts,
-sleutels, notificaties, gesproken persoonsgegevens, portretrechten, muziek of
-andere rechten van derden. Behandel de video's als niet vrijgegeven materiaal
-totdat iemand ze van begin tot eind heeft bekeken en beluisterd. Verwijder of
-maskeer gevoelige informatie onomkeerbaar en vraag zo nodig toestemming van
-herkenbare personen en rechthebbenden.
+De maker heeft bevestigd dat hij de video's zelf heeft gemaakt en uitsluitend
+fictieve demo-gegevens heeft gebruikt. De volledige beeld- en geluidsinhoud kon
+in deze werkomgeving niet worden afgespeeld of als frames worden uitgelezen; de
+inhoudelijke controle is dus gebaseerd op die verklaring en niet onafhankelijk
+uitgevoerd. Controleer zo nodig op herkenbare personen, muziek, lettertypes of
+andere onderdelen van derden en vraag daarvoor toestemming als dat van toepassing
+is.
 
-Ook is nog niet vastgelegd of de video's onder AGPL-3.0, een aparte
-Creative-Commons-licentie of alleen met een beperktere toestemming worden
-verspreid. Leg de keuze en de maker/rechthebbende vast voordat de repository
-openbaar wordt.
+De maker heeft verklaard de rechten op de video's te bezitten. Nog te kiezen is
+of hergebruik van de video's onder AGPL-3.0-only valt, of dat een aparte
+Creative-Commons-licentie geldt. De bestaande README beperkt de AGPL-aanduiding
+tot de projectcode; maak de reikwijdte expliciet voordat de repository openbaar
+wordt.
 
 ### Overige bestanden
 
@@ -83,12 +87,13 @@ ze; alleen verwijderen in de huidige werkmap is onvoldoende.
 
 1. Bevestig dat alle codebijdragen mogen worden uitgegeven onder de genoemde
    licentie en dat de AGPL-versie exact overeenkomt met de projectkeuze.
-2. Leg bron, maker, rechten en gebruiksvoorwaarden van de logo's schriftelijk
-   vast. Vervang de logo's als de rechten niet duidelijk zijn. Controleer
-   eventueel het Benelux Merkenregister op verwarring met bestaande merken.
-3. Bekijk en beluister alle instructievideo's volledig. Bevestig rechten op
-   scherminhoud, stemmen, personen, muziek, lettertypes en overige media; leg
-   daarna de videolicentie en eventuele toestemming vast.
+2. Leg de verklaring vast dat de maker het logo met AI heeft gemaakt. Noteer
+   welke AI-dienst is gebruikt, controleer de toepasselijke voorwaarden en
+   onderzoek eventueel het Benelux Merkenregister op verwarring met bestaande
+   merken.
+3. Leg de keuze vast of logo en video's onder AGPL-3.0-only of onder een aparte
+   licentie worden verspreid. Controleer eventuele onderdelen van derden in de
+   video's en regel daarvoor zo nodig toestemming.
 4. Voer een secretscan uit op alle branches en commits die openbaar worden.
    Beoordeel ook de niet-getrackte patch-, demo- en installatiebestanden apart.
 5. Werk daarna README, licentiekennisgevingen en release-instructies bij en
@@ -104,3 +109,4 @@ ze; alleen verwijderen in de huidige werkmap is onvoldoende.
 - [GitHub: Git LFS-opslag en bandbreedte](https://docs.github.com/en/billing/concepts/product-billing/git-lfs)
 - [Nederlandse overheid/RVO: auteursrecht](https://business.gov.nl/regulations/copyright/)
 - [BOIP: intellectuele-eigendomsrechten controleren](https://business.gov.nl/products-services-and-innovation/protecting-your-product-or-idea/check-if-your-idea-is-already-protected-by-intellectual-property-rights/)
+- [OpenAI: gebruiksvoorwaarden](https://openai.com/policies/terms-of-use/)
