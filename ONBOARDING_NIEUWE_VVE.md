@@ -118,11 +118,16 @@ Dit is een noodzakelijke beveiligingsgrens, geen optionele mapindeling.
 
 ### Instructievideo’s
 
-Bij de stappen komen korte instructievideo’s. De links worden toegevoegd zodra
-de video’s zijn gepubliceerd. De routegidsen markeren waar een bijbehorende
-video-link kan worden geplaatst.
+De repository bevat negen instructievideo's over functies van de app. Na
+installatie zijn ze beschikbaar via het menu **Instructies** voor ingelogde
+gebruikers, mits de beheerder de gedeelde map `instructies/` heeft geplaatst.
+Deze video's leggen de app uit; ze zijn geen STRATO-, PHP-, database- of
+installatiehandleiding. Die hostingstappen staan in de routegidsen hieronder.
 
-<!-- ***VIDEO_LINKS: voeg gepubliceerde URLs voor STRATO, mappen/upload, database en eerste login toe.*** -->
+De map `instructies/` wordt niet automatisch naar een instantie gekopieerd.
+Plaats haar, met `.htaccess` en de negen via Git LFS opgehaalde MP4-bestanden,
+naast de instantiemap en buiten alle openbare document-roots. Voor meerdere
+VvE-instanties op hetzelfde hostingaccount kan die map worden gedeeld.
 
 ## Kies een van de drie routes
 

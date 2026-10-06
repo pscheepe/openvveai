@@ -30,7 +30,12 @@ configuratie, gebruikersbestanden, uploads, databases, back-ups, sessies,
    ```
 
    Open een clone opnieuw met `git clone` en `git lfs pull` om te controleren
-   dat een nieuwe gebruiker de volledige video's kan ophalen. Controleer dat
+   dat een nieuwe gebruiker de volledige video's kan ophalen. Op de webserver
+   worden de video's apart naar een map `instructies/` in de bovenliggende map
+   van de VvE-instanties geplaatst, naast de instantiemappen en buiten de
+   document-roots; zie [het installatieoverzicht](ONBOARDING_NIEUWE_VVE.md#instructievideos).
+   `tools/create_instance.py`
+   kopieert ze niet automatisch. Controleer dat
    iedere MP4 een geldige videobestandsgrootte heeft en speel de instructies
    steekproefsgewijs af.
 5. Bouw de deployment vanuit `release/public/` volgens de technische

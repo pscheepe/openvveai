@@ -5,18 +5,18 @@ gebruikers zelf kunnen installeren, beheren en aanpassen. De oorspronkelijke
 projectcode, documentatie, instructievideo's en logo's vallen onder de GNU
 Affero General Public License versie 3 (AGPL-3.0-only). De meegeleverde
 PDF-parser behoudt zijn eigen LGPL-3.0-licentie; zie
-[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). **Huidige versie: 8.50-beta.** Dit is een testversie; gebruik haar
-eerst in een afgeschermde testinstallatie met fictieve gegevens. Lees ook de
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+**Huidige versie: 8.50-beta.** Dit is een testversie; gebruik haar eerst in
+een afgeschermde testinstallatie met fictieve gegevens. Lees ook de
 [disclaimer](DISCLAIMER.md), [supportgrenzen](SUPPORT.md)
-en [derdenkennisgevingen](THIRD_PARTY_NOTICES.md). De GitHub-repository kan
-privé blijven totdat de eigenaar haar zichtbaarheid wijzigt; een push maakt
-een private repository niet automatisch openbaar.
+en [derdenkennisgevingen](THIRD_PARTY_NOTICES.md). De GitHub-repository is nog
+privé; een push maakt haar niet automatisch openbaar.
 
 Als je een aangepaste versie op een server aanbiedt, lees dan ook AGPL-sectie 13:
 gebruikers die ermee via een netwerk communiceren moeten toegang krijgen tot de
-Corresponding Source van die draaiende versie. De huidige repository is privé;
-maak haar niet publiek beschikbaar voordat rechten op code, logo's en bijdragen
-zijn gecontroleerd.
+Corresponding Source van die draaiende versie. De rechtenverklaring en
+resterende publicatiebeperkingen staan in
+[`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md).
 
 Deze versie bevat de volledige PHP-toepassing: contacten, adressen, relaties,
 activa, sleutels, onderhoud, MJOP-verwijzingen, projecten, vergaderingen,
@@ -57,13 +57,17 @@ SSH nodig. Een AI-wizard die hostinginstellingen zelf uitvoert bestaat nog niet.
 
 Geen bestaande contacten, adressen, documenten, e-mails, documentteksten,
 zoekindexen, activiteiten, gebruikers, wachtwoorden, API-sleutels of back-ups
-zijn overgenomen. Geen Git-historie, oude ZIP's, SQL-dumps of bronanalyses worden
-meegeleverd. De naam, het adres, het logo en specifieke MJOP-documentkoppelingen
-van de oorspronkelijke VvE zijn verwijderd. De negen huidige productinstructies
+zijn overgenomen. De oude Git-geschiedenis van de oorspronkelijke VvE-app,
+oude ZIP's, SQL-dumps en bronanalyses zijn niet opgenomen. De naam, het adres,
+het logo en specifieke MJOP-documentkoppelingen van de oorspronkelijke VvE zijn
+verwijderd. De negen huidige productinstructies
 staan in `instructies/` en worden met Git LFS opgeslagen; Git LFS moet zijn
-geïnstalleerd om de videobestanden bij een nieuwe clone op te halen. De oude
-opnames uit de oorspronkelijke VvE-omgeving zijn niet opgenomen. Controleer de
-huidige video's zijn volgens de maker zelfgemaakt met fictieve demo-gegevens.
+geïnstalleerd om de videobestanden bij een nieuwe clone op te halen. Voor
+weergave in een serverinstallatie moet deze gedeelde map in de bovenliggende
+map van de VvE-instanties en buiten de document-roots worden geplaatst; zie
+[het installatieoverzicht](ONBOARDING_NIEUWE_VVE.md#instructievideos). De oude
+opnames uit de oorspronkelijke VvE-omgeving zijn niet opgenomen. Volgens de
+maker zijn de huidige video's zelfgemaakt met fictieve demo-gegevens.
 De maker heeft bevestigd het logo met AI te hebben gemaakt en heeft gekozen
 voor AGPL-3.0-only voor eigen logo's en video's. Zie
 [`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md) voor de
@@ -79,7 +83,9 @@ of nieuwe codes toevoegen; die wijzigingen blijven in de privéconfiguratie
 van de eigen VvE en krijgen voorrang op de databasetekst.
 
 Externe AI staat standaard uit; de lokale bronnenzoeker blijft aanwezig.
-E-mail heeft nog geen accounts of wachtwoorden. Automatische back-ups staan uit.
+E-mailaccounts en mailboxinstellingen zijn optioneel configureerbaar; het
+mailboxwachtwoord staat server-lokaal buiten de database en de installatie-ZIP.
+Automatische back-ups staan standaard uit.
 Tweestapsverificatie via een authenticator-app is beschikbaar als
 installatieoptie. Deze staat standaard uit voor de demo; een beheerder kan
 haar per echte installatie optioneel of verplicht maken. Herstelcodes zijn
@@ -118,14 +124,14 @@ installatie-ID. Gebruik voor een nieuwe VvE altijd een nieuwe lege installatie.
 
 ## Verder ontwikkelen
 
-Bewaar deze schone basis in een nieuwe repository. Ontwikkel de gemeenschappelijke
-PHP-code in `release/public`. Rol dezelfde geteste code uit naar de `public`-map van
-iedere VvE; behoud diens `private`-map. Neem wijzigingen aan templates en schema mee
-in versiebeheer en maak expliciete migraties voor bestaande installaties.
+Deze repository is de schone basis. Ontwikkel de gemeenschappelijke PHP-code in
+`release/public`. Rol dezelfde geteste code uit naar de `public`-map van
+iedere VvE; behoud diens `private`-map. Neem wijzigingen aan templates en schema
+mee in versiebeheer en maak expliciete migraties voor bestaande installaties.
 
 De eenmalige omzetting uit de oorspronkelijke VvE-toepassing en databaseback-up
-maakt geen deel uit van deze repository. Ontwikkel rechtstreeks in deze schone
-broncode; neem geen gegevens of Git-geschiedenis uit de oorspronkelijke VvE over.
+maakt geen deel uit van deze repository. Ontwikkel rechtstreeks in deze broncode;
+neem geen gegevens of geschiedenis van die oorspronkelijke toepassing over.
 
 ## Licentie, geen support en geen garantie
 
@@ -134,11 +140,9 @@ Zie [LICENSE](LICENSE) voor de AGPL-3.0-licentie en
 De software is “zoals ze is”; er wordt geen garantie, aansprakelijkheid of
 supportdienst toegezegd, voor zover wettelijk toegestaan. De precieze grenzen en
 verantwoordelijkheden staan in [DISCLAIMER.md](DISCLAIMER.md) en [SUPPORT.md](SUPPORT.md).
-Deze projectteksten zijn geen juridisch advies. Controleer vóór een publieke
-release of de rechthebbenden toestemming hebben gegeven voor de uitgave en of
-alle gebruikte logo's en overige onderdelen juist zijn gelicentieerd. De maker
-heeft verklaard de logo's en instructievideo's zelf te hebben gemaakt en heeft
-gekozen voor AGPL-3.0-only voor deze eigen materialen. Zie
+Deze projectteksten zijn geen juridisch advies. De maker heeft bevestigd dat de
+eigen code en media mogen worden gepubliceerd en heeft AGPL-3.0-only voor die
+eigen materialen gekozen. De naam- en logocontroles hebben beperkingen; zie
 [`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md) voor de
 resterende controles vóór openbaarmaking.
 
@@ -153,5 +157,3 @@ De integratietest vereist een expliciet opgegeven tijdelijke MariaDB-socket.
 Gebruik daarvoor geen bestaande productiedatabase. Op macOS moet het testvolume
 hoofdlettergevoelig zijn: het bestaande schema heeft twee verschillende tabelnamen
 die alleen in hoofdlettergebruik verschillen.
-**Huidige versie: 8.50-beta.** Dit is een testversie; gebruik haar eerst in
-een afgeschermde testinstallatie met fictieve gegevens.

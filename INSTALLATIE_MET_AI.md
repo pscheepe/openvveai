@@ -21,8 +21,6 @@ API-account.
 
 ## Zo gebruik je AI veilig als begeleider
 
-<!-- ***INSTRUCTIEVIDEO: link toevoegen zodra de video over AI-begeleiding beschikbaar is.*** -->
-
 Open [de STRATO-webhandleiding](INSTALLATIE_STRATO_WEB.md) in één tab en een
 AI-chat in een andere. Vraag de AI telkens om **één volgende handeling**. Deel
 alleen de schermtitel, menutekst en generieke foutmelding. Typ of upload geen

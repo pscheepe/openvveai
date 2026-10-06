@@ -1,7 +1,7 @@
 # OpenVvE AI — projectvisie voor de openbare uitgave
 
-**Status:** privé-ontwikkeling, nog niet openbaar gepubliceerd. De beoogde naam op de
-website is **OpenVvE AI**; `OpenVvEAI` kan als compacte repository- en
+**Status:** de repository is nog privé. De beoogde naam op de website is
+**OpenVvE AI**; `OpenVvEAI` kan als compacte repository- en
 pakketnaam worden gebruikt. Het geregistreerde domein `openvveai.nl` is
 bedoeld voor de toekomstige projectwebsite. Deze tekst wijzigt geen DNS,
 hosting of bestaande demo-installatie.
@@ -37,28 +37,30 @@ ze in de openbare uitgave werken en zijn gedocumenteerd. Een Docker-installatie,
 API-documentatie en een publieke demo zijn gewenste uitbreidingen, geen
 bestaande publicatiebeloften.
 
-## Voor publicatie afronden
+## Publicatiestatus
 
-- Maak een **nieuwe repository zonder de geschiedenis** van de oorspronkelijke
-  VvE-toepassing. Neem uitsluitend de gecontroleerde schone broncode en
-  gegevensvrije schema's over; geen databaseback-ups, exports, uploads,
-  configuraties, wachtwoorden, sessies of interne deploymentbestanden.
-- Controleer alle bestanden en de uiteindelijke repositorygeschiedenis op
-  persoonsgegevens, geheimen, organisatiespecifieke gegevens en persoonlijke
-  hostnamen. Controleer ook demo-gegevens en gegenereerde pakketten.
-- Publiceer de gekozen AGPL-3.0-licentie voor de eigen code. Controleer vóór
-  openbaarmaking de rechten op de code en de logo's, en behoud de afzonderlijke
-  LGPL-3.0-licentie van de meegeleverde PDF-parser.
-- Documenteer installatie, configuratie, updates en migraties, beveiliging,
-  back-ups en herstel. Test een lege installatie en twee strikt gescheiden
-  VvE-installaties met fictieve gegevens op de ondersteunde omgeving.
-- Leg vast hoe kwetsbaarheden gemeld kunnen worden zonder gegevens van een
-  VvE in openbare issues te plaatsen. Publiceer heldere grenzen aan
-  ondersteuning en laat juridische tekst toetsen vóór publicatie.
-- Koppel `openvveai.nl` pas aan de projectwebsite wanneer code, documentatie,
-  licentie en publicatie-informatie klaar zijn. Een eventuele demo bevat
-  uitsluitend fictieve gegevens en heeft een eigen beveiligings- en
-  resetbeleid.
+Deze repository bevat de opgeschoonde broncode en niet de oorspronkelijke
+Git-geschiedenis, databaseback-ups, exports, uploads, configuraties, wachtwoorden,
+sessies of deploymentbestanden van de oude VvE-toepassing. De repository is op
+dit moment nog privé.
+
+De applicatiecode, eigen documentatie, logo's en instructievideo's zijn gekozen
+onder AGPL-3.0-only; de PDF-parser behoudt LGPL-3.0. De maker heeft verklaard de
+rechten op de eigen code en media te bezitten. De naam-/logocontroles en de
+beveiligingsreview hebben beperkingen; zie
+[`docs/PUBLICATION_READINESS.md`](docs/PUBLICATION_READINESS.md) en
+[`docs/SECURITY_REVIEW_GITHUB.md`](docs/SECURITY_REVIEW_GITHUB.md).
+
+De bestaande installatie-, beveiligings-, support- en licentiedocumenten horen
+bij deze bron. De deploymentchecklist in [`RELEASING.md`](RELEASING.md) vraagt
+om een providergerichte acceptatietest voordat de software als productiegeschikt
+wordt beschreven. Die test en een onafhankelijke penetratietest zijn niet
+uitgevoerd.
+
+Een eventuele projectwebsite of demo moet alleen functies tonen die werkelijk
+beschikbaar zijn. Demo's gebruiken fictieve gegevens en hebben eigen
+beveiligings- en resetprocedures. Een status of domeinwijziging wordt niet door
+deze projectvisie uitgevoerd.
 
 Een tekst over ontbreken van garantie of aansprakelijkheid moet aansluiten
 op de gekozen licentie en de toepasselijke wetgeving; deze projectvisie is

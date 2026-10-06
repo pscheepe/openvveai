@@ -57,8 +57,6 @@ het VvE-bestuur.
 
 ## Stap 1 — open het juiste hostingpakket
 
-<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor hosting en domein.*** -->
-
 1. Meld je aan bij de STRATO-klantenlogin.
 2. Kies het hostingpakket dat voor deze VvE is bedoeld.
 3. Controleer de pakketnaam en het domein bovenin het scherm. Gebruik geen
@@ -68,8 +66,6 @@ STRATO legt de navigatie van de klantenlogin uit in
 [deze schermafbeeldingrijke startgids](https://www.strato.nl/faq/hosting/eerste-stappen-in-de-klantenlogin/).
 
 ## Stap 2 — controleer PHP
-
-<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor PHP instellen.*** -->
 
 1. Open **Databases en webspace → PHP-versie instellen**.
 2. Kies PHP 8.4 als deze versie in het pakket beschikbaar is.
@@ -81,8 +77,6 @@ Bekijk STRATO’s actuele schermbeelden en uitleg bij
 [PHP-instellingen wijzigen](https://www.strato.nl/faq/hosting/hoe-wijzig-ik-de-php-instellingen-in-mijn-pakket/).
 
 ## Stap 3 — maak een database voor deze VvE
-
-<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor een lege database maken.*** -->
 
 1. Open **Databases en webspace → Databasebeheer**.
 2. Klik **Database aanmaken** en kies MySQL of MariaDB, als de keuze wordt
@@ -125,13 +119,12 @@ en certificaattoewijzing in
 
 ## Stap 6 — maak de webmappen
 
-<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor mappen aanmaken.*** -->
-
 Maak via STRATO Webspace/File Manager als die in jouw pakket beschikbaar is,
 of via FileZilla met SFTP, deze structuur:
 
 ```text
 vve-platform/
+├── instructies/ ← gedeelde app-video's; buiten iedere document-root
 └── jouw-vve/
     ├── public/     ← enige map die het domein publiek aanbiedt
     ├── private/    ← buiten de document-root; nooit via het web bereikbaar
@@ -145,8 +138,6 @@ startmappen en het tonen van verborgen `.htaccess`-bestanden uit in
 
 ## Stap 7 — plaats de bestanden
 
-<!-- ***INSTRUCTIEVIDEO: voeg hier de gepubliceerde link toe voor bestanden uploaden en ordenen.*** -->
-
 In versie 8.50-beta wordt een lege instantie eerst met het projectscript
 voorbereid. Een beheerder met de technische route kan je de gegevensvrije
 instantiebestanden geven. Upload vervolgens de inhoud:
@@ -155,6 +146,14 @@ instantiebestanden geven. Upload vervolgens de inhoud:
 - de inhoud van instantie-map `private` naar de servermap `private`;
 - de inhoud van instantie-map `install` naar de servermap `install`;
 - de meegeleverde `.htaccess`-bestanden op hun bijbehorende plek.
+
+Wil je de productinstructievideo's in de app gebruiken, upload dan ook de map
+`instructies/` uit de bronrepository naar de gedeelde map op het niveau van
+`vve-platform/` hierboven. Gebruik de echte MP4-bestanden die met Git LFS zijn
+opgehaald en behoud `instructies/.htaccess`. De video's worden na aanmelden
+via **Instructies** afgespeeld; ze tonen app-functies en zijn geen STRATO-
+installatievideo's. Zonder deze optionele map blijven de overige functies
+beschikbaar, maar de instructievideo's kunnen niet worden afgespeeld.
 
 Upload geen `private`- of `install`-bestanden ín de openbare `public`-map.
 Controleer in Domeinbeheer dat het domein rechtstreeks op

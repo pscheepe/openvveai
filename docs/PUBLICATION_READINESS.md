@@ -41,7 +41,11 @@ De app verwijst naar negen bestanden met vaste namen in `instructies/`. De
 bestanden zijn samen ongeveer 500 MB en staan onder Git LFS; `.htaccess` blokkeert
 rechtstreekse webtoegang tot die map. Nieuwe clones moeten Git LFS installeren
 en de LFS-objecten ophalen. Houd rekening met GitHub-opslag- en
-bandbreedtelimieten.
+bandbreedtelimieten. In de app verschijnen de video's voor ingelogde gebruikers
+via een geauthenticeerde stream. `tools/create_instance.py` kopieert de map niet:
+voor weergave op een server moet `instructies/` apart in de bovenliggende map
+van de instanties worden geplaatst, buiten de document-roots. De
+installatiehandleidingen beschrijven dit nu.
 
 De maker heeft bevestigd de video's zelf te hebben gemaakt, uitsluitend
 fictieve demo-gegevens te gebruiken en ze onder AGPL-3.0-only beschikbaar te
@@ -52,11 +56,15 @@ derden moeten afzonderlijk worden gecontroleerd en zo nodig vrijgegeven.
 ## Bestanden buiten de release
 
 Oudere patchmappen, `package-dropdown-fix/`, `OLLAMA_DEMO_B.md`, installatie-
-PDF-kopieën, een losse grote logo-variant en `index.php` blijven buiten de
-release. Ze zijn niet inhoudelijk beoordeeld op actualiteit, persoonlijke
-gegevens, serveradressen of rechten. De Markdown-handleidingen in versiebeheer
-zijn de bronbestanden. De persoonlijke Ollama-notities bevatten details van de
-thuisomgeving en worden niet gepubliceerd.
+PDF-kopieën, een losse grote logo-variant, `index.php` en losse eenmalige
+hulpscripts blijven buiten de release; ze zijn niet volledig beoordeeld op
+actualiteit, persoonlijke gegevens, serveradressen of rechten. De
+niet-getrackte `AI_INSTALLATIEBEGELEIDER.md` en `INSTALLATIESTRATEGIE.md` zijn
+wel ingezien: het zijn voorstellen voor toekomstig werk, geen beschrijving van
+geïmplementeerde installatieroutes. Ze zijn niet klaargezet voor publicatie.
+De Markdown-handleidingen in versiebeheer zijn de actuele bronbestanden. De
+persoonlijke Ollama-notities bevatten details van de thuisomgeving en worden
+niet gepubliceerd.
 
 ## Secretscan en beveiligingsreview
 
@@ -83,8 +91,10 @@ publicatievoorbereiding gevalideerd.
 4. **Secretscan:** uitgevoerd over alle aanwezige Git-commits/refs en de
    werkmap; de ene historische publieke testvector is per exacte fingerprint
    gedocumenteerd en uitgesloten.
-5. **Releasevoorbereiding:** README en derde-partijkennisgeving bijgewerkt.
-   Zie [`RELEASING.md`](RELEASING.md) voor de clone- en LFS-checklist.
+5. **Documentatie:** README, installatiehandleidingen, derde-partijkennisgeving,
+   projectvisie en release-instructies bijgewerkt om implementatie en de
+   app-video's te beschrijven. Zie [`RELEASING.md`](../RELEASING.md) voor de
+   clone- en LFS-checklist.
 6. **Zichtbaarheid:** repository blijft privé tot de releasechecks zijn
    afgerond. Openbaar maken is een afzonderlijke laatste handeling.
 

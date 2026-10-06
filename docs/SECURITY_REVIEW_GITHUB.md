@@ -53,7 +53,7 @@ The application separates VvE data by installation, database, user file and priv
 
 This was a risk-based static code review. It did not include a live deployment test, penetration test, independent reviewer, dependency vulnerability scan, STRATO configuration audit, or legal review of ownership and licensing. The bundled PDF parser and other third-party components should be included in a dependency and license inventory before public release.
 
-The workspace contains dated repair packages and other historical material alongside the current app. Publish from a curated source tree and stage only the intended release files; do not use a broad `git add .` from the workspace. Before making a GitHub repository public, separately confirm permission to publish all code, logos, documents and third-party assets, then review the staged commit for credentials, personal data, backups and old patch archives.
+The workspace contains dated repair packages and other historical material alongside the current app. Publish from a curated source tree and stage only the intended release files; do not use a broad `git add .` from the workspace. The maker's rights declaration and chosen licenses are recorded in `docs/PUBLICATION_READINESS.md`; the name/logo search and independent visual comparison have documented limitations. Before changing GitHub visibility, review the exact public commit for credentials, personal data, backups and old patch archives.
 
 ## Overall assessment
 

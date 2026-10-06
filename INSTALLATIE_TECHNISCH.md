@@ -15,8 +15,6 @@ VvE.
 
 ## 1. Maak lokaal een schone instantie
 
-<!-- ***INSTRUCTIEVIDEO: link toevoegen zodra de video over een nieuwe instantie beschikbaar is.*** -->
-
 Haal de vertrouwde broncode op. Voer vanuit de projectmap uit en vervang naam
 en host door die van de VvE:
 
@@ -29,6 +27,11 @@ python3 tools/create_instance.py \
 
 Het script weigert bestaande bestemmingen te overschrijven. Het maakt onder
 meer `public`, `private` en `install`. Deel de `private`-map nooit tussen VvE's.
+Het script kopieert de instructievideo's niet. Wil je de app-video's aanbieden,
+plaats dan de gedeelde map `instructies/` in de bovenliggende map waarin ook de
+VvE-instanties staan, naast de afzonderlijke instantiemappen,
+zoals beschreven in [het installatieoverzicht](ONBOARDING_NIEUWE_VVE.md#instructievideos).
+Haal de video's eerst met Git LFS op.
 
 ## 2. Maak hostingvoorzieningen aan
 
@@ -40,8 +43,6 @@ wachtwoordkluis, nooit in Git of een chat. Zie de STRATO-stappen in
 
 ## 3. Upload en configureer
 
-<!-- ***INSTRUCTIEVIDEO: link toevoegen zodra de video over uploaden en configureren beschikbaar is.*** -->
-
 Upload met SFTP de volledige instantie naar een nieuwe projectmap, bijvoorbeeld
 `/vve-platform/mijn-vve`. Stel de document-root van het domein uitsluitend in
 op `/vve-platform/mijn-vve/public`. Bewaar de meegeleverde `.htaccess`-bestanden.
@@ -51,8 +52,6 @@ Maak op de server `private/config.php` als kopie van
 Controleer dat `private` en `install` buiten de openbare document-root staan.
 
 ## 4. Maak de beheerder en initialiseer de database
-
-<!-- ***INSTRUCTIEVIDEO: link toevoegen zodra de video over de eerste database-installatie beschikbaar is.*** -->
 
 Log via SSH in, ga naar de instantie en voer uit:
 
