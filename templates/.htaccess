@@ -6,7 +6,7 @@ RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L,NE]
 
-<FilesMatch "(^\.|\.(sql|json|zip|gz|bak|log|txt|md)$|^(tenant|security|auth|activity|ai_provider|backup_lib|mail_credentials|document_text|maintenance_mjop|instruction_ui|preflight)\.php$)">
+<FilesMatch "(^\.|\.(sql|json|zip|gz|bak|log|txt|md)$|^(tenant|security|auth|activity|ai_provider|backup_lib|mail_credentials|document_text|maintenance_mjop|instruction_ui|preflight|mfa)\.php$)">
     Require all denied
 </FilesMatch>
 <IfModule mod_headers.c>

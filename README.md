@@ -73,6 +73,11 @@ van de eigen VvE en krijgen voorrang op de databasetekst.
 
 Externe AI staat standaard uit; de lokale bronnenzoeker blijft aanwezig.
 E-mail heeft nog geen accounts of wachtwoorden. Automatische back-ups staan uit.
+Tweestapsverificatie via een authenticator-app is beschikbaar als
+installatieoptie. Deze staat standaard uit voor de demo; een beheerder kan
+haar per echte installatie optioneel of verplicht maken. Herstelcodes zijn
+eenmalig. Bewaar de private `mfa.key` samen met de gebruikersconfiguratie in
+een beveiligde applicatieback-up.
 
 ## Nieuwe VvE voorbereiden
 
@@ -97,7 +102,9 @@ De bestaande back-upfunctie is per VvE gescheiden. De database-export bevat alle
 de eigen database. De applicatie-ZIP omvat de eigen code, private-configuratie,
 gebruikers en uploads; bestaande back-ups, sessies en tijdelijke bestanden worden
 uitgesloten om recursieve archieven te voorkomen. Deze ZIP bevat dus geheimen en
-moet privé blijven. Een back-up op dezelfde hosting is geen off-site back-up.
+moet privé blijven. De MFA-sleutel staat in de private-configuratie en is nodig
+voor authenticatorcodes; herstelcodes werken ook als deze sleutel verloren gaat.
+Een back-up op dezelfde hosting is geen off-site back-up.
 
 Herstel een volledige back-up uitsluitend als dezelfde VvE, inclusief de bijbehorende
 installatie-ID. Gebruik voor een nieuwe VvE altijd een nieuwe lege installatie.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__.'/tenant.php';
 require_once __DIR__ . '/security.php';
 require_once __DIR__ . '/instruction_ui.php';
+require_once __DIR__ . '/mfa.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_name('__Host-VVE'.tenantConfig()['id']);
@@ -81,6 +82,9 @@ function requireLogin(): array {
         http_response_code(401);
         throw new RuntimeException('Inloggen vereist.');
     }
+    if (mfaPolicy() === 'required' && empty(loadUsers()[(string)$u['username']]['mfa_secret'])) {
+        if (basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) !== 'mfa_settings.php') { header('Location: mfa_settings.php'); exit; }
+    }
     if (!empty($u['must_change_password']) && basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) !== 'change_password.php') {
         header('Location: change_password.php');
         exit;
@@ -97,6 +101,7 @@ function requireAdmin(): array {
 }
 function attemptLogin(string $username, string $password): bool {
     $username = trim($username);
+    unset($_SESSION['mfa_pending_user'], $_SESSION['mfa_pending_at']);
     if ($username === '' || $password === '') return false;
     enforceLoginRateLimit($username);
     $users = loadUsers();
@@ -105,12 +110,22 @@ function attemptLogin(string $username, string $password): bool {
         recordFailedLogin($username);
         return false;
     }
+    if (mfaPolicy() !== 'off' && !empty($u['mfa_secret'])) {
+        session_regenerate_id(true);
+        $_SESSION['mfa_pending_user'] = $username;
+        $_SESSION['mfa_pending_at'] = time();
+        return false;
+    }
+    completeLogin($username, $u);
+    return true;
+}
+function completeLogin(string $username, array $u): void {
     clearFailedLogins($username);
     session_regenerate_id(true);
     $_SESSION['user'] = ['username'=>$username,'role'=>$u['role'] ?? 'bestuur','name'=>$u['name'] ?? $username,'must_change_password'=>!empty($u['must_change_password'])];
+    unset($_SESSION['mfa_pending_user'], $_SESSION['mfa_pending_at']);
     $_SESSION['last_activity'] = time();
     csrfToken();
-    return true;
 }
 function validateSafePassword(string $password): void {
     if (strlen($password) < 12) throw new InvalidArgumentException('Het wachtwoord moet minimaal 12 tekens bevatten.');
