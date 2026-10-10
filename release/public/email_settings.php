@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/tenant.php';
-ob_start(static fn(string $html):string=>str_replace(['GUI v8.26','<a href="ai_settings.php">AI</a><a href="activity_log.php">','</nav>'],['<a class="badge" href="version_log.php" title="Bekijk wijzigingen per versie">GUI V8.60</a>','<a href="ai_settings.php">AI</a><a href="backup_settings.php">Back-ups</a><a href="activity_log.php">','<a href="version_log.php">Versies</a></nav>'],$html));
+ob_start(static fn(string $html):string=>str_replace(['GUI v8.26','<a href="ai_settings.php">AI</a><a href="activity_log.php">','</nav>'],['<a class="badge" href="version_log.php" title="Bekijk wijzigingen per versie">GUI v8.50</a>','<a href="ai_settings.php">AI</a><a href="backup_settings.php">Back-ups</a><a href="activity_log.php">','<a href="version_log.php">Versies</a></nav>'],$html));
 require_once __DIR__.'/activity.php';
 require_once __DIR__.'/mail_credentials.php';
 $admin=requireAdmin();$pdo=activityDb();$message=(string)($_SESSION['email_settings_message']??'');unset($_SESSION['email_settings_message']);$error='';$editing=null;$accounts=[];

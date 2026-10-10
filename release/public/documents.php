@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/tenant.php';
 ob_start(static fn(string $html):string=>str_replace(
     ['Externe videolink','videolink moet worden opgeslagen','HiDrive-/videolink','GUI v8.26'],
-    ['Extern groot bestand','externe bestandslink moet worden opgeslagen','Externe bestandslink','<a class="header-version" href="version_log.php" style="color:#fff;text-decoration:none" title="Bètaversie V8.60 — bekijk wijzigingen">GUI V8.60 · BETA</a>'],
+    ['Extern groot bestand','externe bestandslink moet worden opgeslagen','Externe bestandslink','<a class="header-version" href="version_log.php" style="color:#fff;text-decoration:none" title="Bètaversie 8.50 — bekijk wijzigingen">GUI v8.50 · BETA</a>'],
     $html
 ));
 require_once __DIR__.'/auth.php';

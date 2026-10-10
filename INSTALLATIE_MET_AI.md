@@ -11,10 +11,10 @@ API-account, plus de afbakening met de financiële administratie, begin bij
 ## Belangrijke status
 
 **Een AI-installatiewizard die zelf inlogt, bestanden aanmaakt of instellingen
-wijzigt is niet aanwezig in versie V8.60.** Deze gids beschrijft veilig
+wijzigt is niet aanwezig in versie 8.50-beta.** Deze gids beschrijft veilig
 gebruik van een algemene AI-chat als uitleg naast de STRATO-webpagina. Jij
 klikt zelf en controleert elke handeling. De daadwerkelijke installatie van
-V8.60 heeft voor de serverstappen nog een technisch beheerder nodig die
+8.50-beta heeft voor de serverstappen nog een technisch beheerder nodig die
 SSH gebruikt. De voorbeelden gaan uit van een nieuwe VvE, nieuw domein en lege
 database. Geef een AI nooit toegang tot je hosting-, e-mail-, database- of
 API-account.
@@ -29,7 +29,7 @@ gegevens, echte VvE-documenten of een screenshot met zulke waarden.
 
 Kopieer deze startprompt in een AI-chat:
 
-> Begeleid mij stap voor stap bij een OpenVvE AI V8.60 testinstallatie op
+> Begeleid mij stap voor stap bij een OpenVvE AI 8.50-beta testinstallatie op
 > STRATO. Ik voer zelf alle handelingen uit. Geef per antwoord maar één stap:
 > noem het STRATO-menupad, wat ik op het scherm moet zien, wat ik moet
 > invullen zonder geheimen te vragen, hoe ik controleer dat het gelukt is en
@@ -56,7 +56,7 @@ Kopieer deze startprompt in een AI-chat:
 5. **Stop bij twijfel over kosten, domeinen, niet-lege mappen of databases.**
    Vraag eerst het VvE-bestuur of de hostingprovider.
 6. **Stop als de begeleider SSH-commando’s nodig heeft.** Dat is een harde
-   grens van de browserroute in bèta V8.60; laat het afronden door de beheerder
+   grens van de browserroute in bèta 8.50; laat het afronden door de beheerder
    uit [de technische handleiding](INSTALLATIE_TECHNISCH.md).
 7. **Test met fictieve gegevens.** Gebruik geen echte bewonersgegevens om
    een onbekende stap of AI-antwoord uit te proberen.
@@ -89,4 +89,4 @@ checklist, STRATO-schermgids en een optionele AI-vraag-en-antwoordfunctie
 worden gebouwd. Die wizard mag geen providerwachtwoorden of API-sleutels naar
 een externe AI sturen en mag geen database- of bestandswijziging zonder
 expliciete bevestiging uitvoeren. Dit is toekomstig ontwikkelwerk, geen
-bestaande V8.60-functie.
+bestaande 8.50-beta-functie.

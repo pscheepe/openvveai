@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/tenant.php';
 ob_start(static fn(string $html):string=>str_replace(
     ['GUI v8.26','padding:9px 12px;border:1px solid #bfc8d2','<a href="ai_settings.php">AI</a><a class="active" href="activity_log.php">','</nav>'],
-    ['<a class="badge" href="version_log.php" title="Bekijk wijzigingen per versie">GUI V8.60</a>','padding:7px 10px;font-size:12px;line-height:1.2;border:1px solid #bfc8d2','<a href="ai_settings.php">AI</a><a href="backup_settings.php">Back-ups</a><a class="active" href="activity_log.php">','<a href="version_log.php">Versies</a></nav>'],
+    ['<a class="badge" href="version_log.php" title="Bekijk wijzigingen per versie">GUI v8.50</a>','padding:7px 10px;font-size:12px;line-height:1.2;border:1px solid #bfc8d2','<a href="ai_settings.php">AI</a><a href="backup_settings.php">Back-ups</a><a class="active" href="activity_log.php">','<a href="version_log.php">Versies</a></nav>'],
     $html
 ));
 require_once __DIR__.'/activity.php';

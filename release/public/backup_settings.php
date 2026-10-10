@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/tenant.php';
-ob_start(static fn(string $html):string=>str_replace(['GUI v8.26','GUI v8.40','</nav>'],['<a class="badge" href="version_log.php" title="Bekijk wijzigingen per versie">GUI V8.60</a>','<a class="badge" href="version_log.php" title="Bekijk wijzigingen per versie">GUI V8.60</a>','<a href="version_log.php">Versies</a></nav>'],$html));
+ob_start(static fn(string $html):string=>str_replace(['GUI v8.26','GUI v8.40','</nav>'],['<a class="badge" href="version_log.php" title="Bekijk wijzigingen per versie">GUI v8.50</a>','<a class="badge" href="version_log.php" title="Bekijk wijzigingen per versie">GUI v8.50</a>','<a href="version_log.php">Versies</a></nav>'],$html));
 require_once __DIR__.'/activity.php';require_once __DIR__.'/backup_lib.php';
 $admin=requireAdmin();$config=backupConfig();$message='';$error='';
 function bh(string $value):string{return htmlspecialchars($value,ENT_QUOTES,'UTF-8');}

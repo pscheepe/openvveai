@@ -49,12 +49,6 @@ function catalogLookups(PDO $db, array $lookups): array {
         'meetings'=>['Soort'=>['Algemene ledenvergadering','Bestuursvergadering']],
         'projects'=>['Status'=>['groen','oranje','rood']],
         'common'=>['Compleet'=>['Waar','Niet waar']],
-        'resident_portal'=>[
-            'TypeMelding'=>['Probleem of storing','Vraag','Klacht','Suggestie'],
-            'OnderwerpMelding'=>['Lift','Water of lekkage','Verwarming of ventilatie','Schoonmaak of algemene ruimte','Geluid of overlast','Deur, slot of sleutel','Afval','Anders'],
-            'LocatieMelding'=>['In mijn appartement','Hal A','Hal B','Hal C','Hal D','Andere algemene ruimte','Buiten bij het gebouw','Anders of ik weet het niet'],
-            'UrgentieMelding'=>['Spoed — direct gevaar of snel erger','Dringend — vandaag bekijken','Normaal — binnen enkele dagen','Geen haast'],
-        ],
     ];
     foreach($defaults as $group=>$fields){
         foreach($fields as $field=>$values){

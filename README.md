@@ -6,7 +6,7 @@ projectcode, documentatie, instructievideo's en logo's vallen onder de GNU
 Affero General Public License versie 3 (AGPL-3.0-only). De meegeleverde
 PDF-parser behoudt zijn eigen LGPL-3.0-licentie; zie
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
-**Huidige versie: V8.60.** Dit is een testversie; gebruik haar eerst in
+**Huidige versie: 8.50-beta.** Dit is een testversie; gebruik haar eerst in
 een afgeschermde testinstallatie met fictieve gegevens. Lees ook de
 [disclaimer](DISCLAIMER.md), [supportgrenzen](SUPPORT.md)
 en [derdenkennisgevingen](THIRD_PARTY_NOTICES.md). De GitHub-repository is nog
@@ -50,41 +50,8 @@ SSH-route, een handmatige STRATO-webpaneelgids en een gids voor veilig gebruik
 van AI als stap-voor-stap vraagbaak. STRATO is de standaardroute vanwege de
 relatief voordelige Europese hostingmogelijkheden; andere providers vergen
 zelfstandige inrichting door de VvE-beheerder. De laatste twee zijn geen zelfstandige
-webinstaller: versie V8.60 heeft voor de laatste installatiestappen nog
+webinstaller: versie 8.50-beta heeft voor de laatste installatiestappen nog
 SSH nodig. Een AI-wizard die hostinginstellingen zelf uitvoert bestaat nog niet.
-
-## Bewonersportaal
-
-Elke installatie bevat een openbaar bewonersportaal op `bewonersportaal.php`.
-Bewoners hebben hiervoor geen account nodig. De beheerlink staat onder
-**Instellingen → Bewonersportaal** en is alleen toegankelijk voor een ingelogde
-administrator. Daar kan het bestuur mededelingen, antwoorden in de vraagbaak en
-de getoonde nieuwsbrieven aanpassen. De nieuwste drie geselecteerde
-nieuwsbrieven worden getoond.
-
-Alleen documenten die het bestuur daar expliciet aanvinkt zijn vanuit het
-portaal te openen of te gebruiken als antwoordbron. Bestandsnamen en mappen
-kunnen helpen om documenten te vinden, maar suggesties maken bestanden niet
-automatisch openbaar. Andere documenten blijven beschikbaar via de bestaande
-zoekfunctie voor bevoegde gebruikers. De keuzelijsten voor soort melding,
-onderwerp, locatie en urgentie zijn aanpasbaar via
-**Instellingen → Dropdowns → Bewonersportaal**.
-
-Bewoners kunnen zonder account een probleem, vraag of klacht indienen. De melding
-wordt per e-mail naar `[verwijderd]` verstuurd; daarvoor moet een actief
-SMTP-account zijn ingesteld. Urgentiekeuze helpt het bestuur de melding te
-beoordelen en vervangt geen contact met 112 of het storingsnummer. Externe
-AI-antwoorden zijn optioneel en staan standaard uit. Als de beheerder ze
-inschakelt, worden de vraag en relevante passages uit vrijgegeven documenten
-naar de ingestelde AI-provider gestuurd.
-
-Voor een kortere URL kan de serverconfiguratie `/bewoners` naar
-`bewonersportaal.php` laten verwijzen. Op Apache kan daarvoor deze regel in
-`.htaccess` worden gebruikt:
-
-```apache
-RewriteRule ^bewoners/?$ bewonersportaal.php [L,NC]
-```
 
 ## Wat is bewust leeg?
 

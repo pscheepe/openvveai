@@ -48,7 +48,6 @@ function renderInstructionMenu(): void {
         <?php endforeach; ?>
       </div>
     </details>
-    <a class="adminlink" href="bewonersportaal.php">🏠 Bewonersportaal</a>
     <section class="instruction-window" id="instructionWindow" role="dialog" aria-modal="false" aria-labelledby="instructionWindowTitle" hidden>
       <div class="instruction-window-head" id="instructionWindowHandle">
         <span aria-hidden="true">🎬</span><strong class="instruction-window-title" id="instructionWindowTitle">Instructievideo</strong><span class="instruction-window-spacer"></span>

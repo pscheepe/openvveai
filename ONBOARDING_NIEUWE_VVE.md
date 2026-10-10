@@ -83,7 +83,7 @@ Het eindresultaat is een website op het internet, bijvoorbeeld
    beheerdersaccount en back-ups namens de VvE beheert. Leg vast hoe toegang
    wordt overgedragen bij een bestuurswissel.
 
-### Technische eisen voor versie V8.60
+### Technische eisen voor versie 8.50-beta
 
 - PHP 8.4 met `pdo_mysql`, `mbstring`, `fileinfo`, `openssl`, `zip` en `zlib`;
   `iconv` wordt ook gebruikt en GD is nodig voor afbeeldingen.
@@ -92,7 +92,7 @@ Het eindresultaat is een website op het internet, bijvoorbeeld
 - Een configureerbare document-root die alleen de map `public` aanbiedt;
   `private` en `install` moeten buiten de openbare website blijven.
 - Bestandsbeheer/SFTP om bestanden veilig over te zetten. De huidige
-  V8.60 vraagt daarnaast PHP-CLI via SSH om de installatie en het eerste
+  8.50-beta vraagt daarnaast PHP-CLI via SSH om de installatie en het eerste
   beheerdersaccount af te ronden.
 - IMAP is optioneel en alleen nodig voor e-mailsynchronisatie.
 - Een kopie van back-ups buiten de hostingruimte, bijvoorbeeld op een door de
@@ -100,7 +100,7 @@ Het eindresultaat is een website op het internet, bijvoorbeeld
   uitval of verlies van het hostingaccount niet alleen afhankelijk van de
   serverkopie.
 
-**Let op:** V8.60 is een testversie. De instructies hieronder gaan uit van
+**Let op:** 8.50-beta is een testversie. De instructies hieronder gaan uit van
 een nieuwe VvE-installatie, een nieuw domein en een nieuwe lege database; ze
 veronderstellen geen bestaande website of bestaande VvE-installatie. Begin met
 fictieve gegevens. De browser-only route en een AI-installatiewizard zijn nog
@@ -137,7 +137,7 @@ VvE-instanties op hetzelfde hostingaccount kan die map worden gedeeld.
 2. [Handmatig via STRATO-webpaneel](INSTALLATIE_STRATO_WEB.md) — laat zien
    hoe je domein, PHP, database, e-mail en SSL via het webpaneel inricht en
    bestanden/mappen met SFTP beheert. De stappen tot aan de eerste
-   app-installatie zijn browsergestuurd; het afronden van versie V8.60
+   app-installatie zijn browsergestuurd; het afronden van versie 8.50-beta
    vraagt nog SSH. STRATO-hulp bevat screenshots bij de relevante handelingen.
 3. [Met AI stap voor stap](INSTALLATIE_MET_AI.md) — een veilige werkwijze om
    een AI-chat als uitleg- en vraagbaak naast je scherm te gebruiken. Jij voert
