@@ -15,7 +15,7 @@ Bij verwerking van persoonsgegevens moet de VvE ook de toepasselijke
 verwerkersovereenkomst en overige AVG-verplichtingen regelen. Zie
 [STRATO's AVG-informatie](https://www.strato.nl/faq/contract/vragen-over-de-verwerkersovereenkomst-en-de-nieuwe-eu-verordening-avg-gdpr/).
 
-> **Status bèta 8.50:** je kunt hostinginstellingen en mappen via het web
+> **Status bèta V8.60:** je kunt hostinginstellingen en mappen via het web
 > inrichten voor een nieuwe VvE met een nieuw domein en een lege database. De
 > huidige bèta heeft
 > echter geen volledige browserinstaller: zij gebruikt nu een lokaal
@@ -42,7 +42,7 @@ HTTPS-, opslag-, toegangs- en privacy-inrichting controleren en uitvoeren.
 ## Benodigd vóór je begint
 
 - STRATO-hostingpakket met PHP 8.4 en de vereiste extensies uit het
-  [installatieoverzicht](ONBOARDING_NIEUWE_VVE.md#technische-eisen-voor-versie-850-beta).
+  [installatieoverzicht](ONBOARDING_NIEUWE_VVE.md#technische-eisen-voor-versie-v860).
 - Een domein of subdomein dat bij de VvE hoort, toegang tot de STRATO-klantenlogin
   en toestemming om het domein en pakket namens de VvE te beheren.
 - Een lege, nieuwe MySQL/MariaDB-database voor deze nieuwe VvE.
@@ -138,7 +138,7 @@ startmappen en het tonen van verborgen `.htaccess`-bestanden uit in
 
 ## Stap 7 — plaats de bestanden
 
-In versie 8.50-beta wordt een lege instantie eerst met het projectscript
+In versie V8.60 wordt een lege instantie eerst met het projectscript
 voorbereid. Een beheerder met de technische route kan je de gegevensvrije
 instantiebestanden geven. Upload vervolgens de inhoud:
 
@@ -175,7 +175,7 @@ Een technisch beheerder moet via SSH:
 4. `php install/check.php` uitvoeren om de installatie te controleren.
 
 Als je dit uitsluitend via browser/STRATO-bestandsbeheer wilt doen, stop dan
-vóór je echte gegevens invoert: die volledige browserroute wordt in 8.50-beta
+vóór je echte gegevens invoert: die volledige browserroute wordt in V8.60
 niet ondersteund. Een veilige eenmalige webinstaller moet eerst worden gebouwd
 en getest; `INSTALLATIE_MET_AI.md` beschrijft wat AI daarbij wel en niet kan.
 

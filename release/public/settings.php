@@ -25,6 +25,15 @@ function lookupMapped(string $group,string $field): bool {
     return ($group==='Activa'&&$field==='ActivaCatID')||($group==='maintenance_plans'&&in_array($field,['OnderhoudsCategorie','StabuCode'],true));
 }
 $saved=lookupRead($path);
+$residentPortalDefaults=[
+    'TypeMelding'=>['Storing','Schade','Overlast','Vraag','Klacht','Anders'],
+    'OnderwerpMelding'=>['Lift','Verwarming','Water/lekkage','Elektriciteit','Schoonmaak','Geluid','Toegang/deuren','Gemeenschappelijke ruimte','Anders'],
+    'LocatieMelding'=>['Appartement/woning','Hal/entree','Lift','Trappenhuis','Parkeergarage','Berging','Buitenruimte','Anders'],
+    'UrgentieMelding'=>['Normaal','Binnen enkele dagen','Spoed'],
+];
+foreach($residentPortalDefaults as $field=>$defaults){
+    if(!isset($saved['resident_portal'][$field])||!is_array($saved['resident_portal'][$field]))$saved['resident_portal'][$field]=$defaults;
+}
 $lookups=catalogLookups($db,$saved);
 if($_SERVER['REQUEST_METHOD']==='POST'){
     try {

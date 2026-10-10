@@ -6,7 +6,7 @@ definities en algemene benodigdheden, begin bij
 [OpenVvE AI voorbereiden en installeren](ONBOARDING_NIEUWE_VVE.md).
 
 De stappen hieronder zijn de huidige, door de broncode ondersteunde route voor
-versie 8.50-beta en gebruiken STRATO als uitgangspunt. De handleiding is geen
+versie V8.60 en gebruiken STRATO als uitgangspunt. De handleiding is geen
 configuratieplan voor andere providers; de VvE-beheerder moet daar zelf de
 gelijkwaardige eisen controleren en inrichten. OpenVvE AI vult het externe
 beheerkantoor aan en vervangt geen bijdrage-incasso, leveranciersbetalingen of
