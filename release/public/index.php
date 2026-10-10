@@ -18,10 +18,10 @@ if($user && !empty($user['must_change_password'])){header('Location: change_pass
 $loginNotice=(string)($_SESSION['login_notice']??'');
 unset($_SESSION['login_notice']);
 if(!$user && $loginError==='' && $loginNotice!=='') $loginError=$loginNotice;
-$appVersion='v8.50-beta';
+$appVersion='V8.60';
 ob_start(static fn(string $html):string=>str_replace(
-    ['padding:15px 20px','font-size:17px','padding:8px 11px;cursor:pointer;font:inherit','<span class="versionbadge">GUI v8.50</span>'],
-    ['padding:11px 14px','font-size:14px','padding:6px 9px;cursor:pointer;font:inherit;font-size:12px;line-height:1.2','<a class="versionbadge" href="version_log.php" style="color:#fff;text-decoration:none" title="Bètaversie 8.50 — bekijk wijzigingen">GUI v8.50 · BETA</a>'],
+    ['padding:15px 20px','font-size:17px','padding:8px 11px;cursor:pointer;font:inherit','<span class="versionbadge">GUI V8.60</span>'],
+    ['padding:11px 14px','font-size:14px','padding:6px 9px;cursor:pointer;font:inherit;font-size:12px;line-height:1.2','<a class="versionbadge" href="version_log.php" style="color:#fff;text-decoration:none" title="Bètaversie V8.60 — bekijk wijzigingen">GUI V8.60 · BETA</a>'],
     $html
 ));
 if(!$user):
