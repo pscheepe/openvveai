@@ -16,10 +16,12 @@ function residentApiTerms(string $question):array{
     foreach($parts as $part){if(mb_strlen($part)<3||in_array($part,$stop,true))continue;$terms[$part]=true;if(count($terms)>=10)break;}
     return array_keys($terms);
 }
-function residentApiDocumentResults(PDO $pdo,array $terms):array{
-    if(!$terms)return [];
-    $conditions=[];$params=[];foreach($terms as $term){$conditions[]='(d.Titel LIKE ? OR d.OrigineleNaam LIKE ? OR d.Tags LIKE ? OR d.Omschrijving LIKE ? OR ti.Tekst LIKE ?)';$like='%'.$term.'%';array_push($params,$like,$like,$like,$like,$like);}
-    $sql='SELECT d.DocumentID,COALESCE(NULLIF(d.Titel,\'\'),d.OrigineleNaam) AS Titel,d.OrigineleNaam,d.Omschrijving,d.Documentdatum,ti.Tekst FROM DocumentBibliotheek d LEFT JOIN DocumentTekstIndex ti ON ti.DocumentID=d.DocumentID WHERE d.IsHuidig=1 AND d.VerwijderdOp IS NULL AND ('.implode(' OR ',$conditions).') LIMIT 500';
+function residentApiDocumentResults(PDO $pdo,array $ids,array $terms):array{
+    $ids=array_values(array_unique(array_filter(array_map('intval',$ids),static fn($id)=>$id>0)));
+    if(!$ids||!$terms)return [];
+    $conditions=[];$params=$ids;foreach($terms as $term){$conditions[]='(d.Titel LIKE ? OR d.OrigineleNaam LIKE ? OR d.Tags LIKE ? OR d.Omschrijving LIKE ? OR ti.Tekst LIKE ?)';$like='%'.$term.'%';array_push($params,$like,$like,$like,$like,$like);}
+    $marks=implode(',',array_fill(0,count($ids),'?'));
+    $sql='SELECT d.DocumentID,COALESCE(NULLIF(d.Titel,\'\'),d.OrigineleNaam) AS Titel,d.OrigineleNaam,d.Omschrijving,d.Documentdatum,ti.Tekst FROM DocumentBibliotheek d LEFT JOIN DocumentTekstIndex ti ON ti.DocumentID=d.DocumentID WHERE d.DocumentID IN ('.$marks.') AND d.IsHuidig=1 AND d.VerwijderdOp IS NULL AND ('.implode(' OR ',$conditions).') LIMIT 500';
     $stmt=$pdo->prepare($sql);$stmt->execute($params);$results=[];
     foreach($stmt->fetchAll(PDO::FETCH_ASSOC) as $row){$text=trim((string)($row['Tekst']??''));if($text==='')$text=trim((string)($row['Omschrijving']??''));$title=(string)$row['Titel'];$score=0;foreach($terms as $term){if(mb_stripos($title,$term)!==false)$score+=4;if(mb_stripos($text,$term)!==false)$score++;}if($score<1)continue;$snippet=$text;if($text!==''){$position=null;foreach($terms as $term){$at=mb_stripos($text,$term);if($at!==false&&($position===null||$at<$position))$position=$at;}$start=max(0,(int)($position??0)-120);$snippet=mb_substr($text,$start,1100);if($start>0)$snippet='…'.$snippet;if(mb_strlen($text)>$start+1100)$snippet.='…';}else $snippet='Document gevonden op basis van titel; de inhoud is niet doorzocht.';$results[]=['id'=>(int)$row['DocumentID'],'title'=>$title,'snippet'=>$snippet,'score'=>$score];}
     usort($results,static fn($a,$b)=>$b['score']<=>$a['score']);return array_slice($results,0,5);
@@ -32,10 +34,10 @@ try{
     $content=residentPortalContent();$pdo=residentPortalDb();$terms=residentApiTerms($question);if(!$terms)throw new SafeInputException('Voeg een duidelijk onderwerp toe aan uw vraag.');
     $qaMatches=[];foreach((array)$content['qa'] as $qa){if(!is_array($qa)||empty($qa['active']))continue;$qaTerms=residentApiTerms((string)($qa['question']??''));$overlap=count(array_intersect($terms,$qaTerms));if($overlap>0)$qaMatches[]=['score'=>$overlap,'qa'=>$qa];}usort($qaMatches,static fn($a,$b)=>$b['score']<=>$a['score']);
     if($qaMatches&&$qaMatches[0]['score']>=max(1,(int)ceil(count($terms)*0.35))){$qa=$qaMatches[0]['qa'];$docs=[];$docId=(int)($qa['document_id']??0);if($docId&&in_array($docId,array_map('intval',(array)$content['documents']),true)){$list=residentPortalDocuments($pdo,[$docId]);if($list)$docs=[['id'=>$docId,'title'=>(string)($list[0]['Titel']?:$list[0]['OrigineleNaam'])]];}residentApiOut(['ok'=>true,'answer'=>(string)$qa['answer'],'documents'=>$docs]);}
-    $results=residentApiDocumentResults($pdo,$terms);
-    if(!$results)residentApiOut(['ok'=>true,'answer'=>'Ik heb geen passend document gevonden. U kunt uw vraag of probleem doorgeven aan het bestuur.','documents'=>[]]);
     $visibleIds=array_map('intval',(array)$content['documents']);
-    $visibleResults=array_values(array_filter($results,static fn($doc)=>in_array((int)$doc['id'],$visibleIds,true)));
+    $results=residentApiDocumentResults($pdo,$visibleIds,$terms);
+    if(!$results)residentApiOut(['ok'=>true,'answer'=>'Ik heb geen passend document gevonden. U kunt uw vraag of probleem doorgeven aan het bestuur.','documents'=>[]]);
+    $visibleResults=$results;
     $answer='Ik vond relevante informatie in “'.$results[0]['title'].'”: '.mb_substr((string)$results[0]['snippet'],0,700);
     if(!empty($content['ai_enabled'])&&$visibleResults&&aiProviderStatus()['configured']){
         $context=[];foreach($visibleResults as $i=>$doc)$context[]='Document '.($i+1).': '.$doc['title']."\nTekst: ".mb_substr((string)$doc['snippet'],0,1800);

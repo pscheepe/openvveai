@@ -10,13 +10,17 @@ function residentPortalContent(): array {
     if(function_exists('opcache_invalidate'))@opcache_invalidate($path,true);
     clearstatcache(true,$path);
     $saved=require $path;
-    return is_array($saved)?array_replace($defaults,$saved):$defaults;
+    if(!is_array($saved))return $defaults;
+    // Keep the existing resident list the first time the separate list choice is introduced.
+    if(!array_key_exists('listed_documents',$saved))$saved['listed_documents']=(array)($saved['documents']??[]);
+    return array_replace($defaults,$saved);
 }
 
 function residentPortalSaveContent(array $content): void {
     $path=uploadDirectory('resident-portal').DIRECTORY_SEPARATOR.'resident_portal.php';
     $safe=[
         'documents'=>array_values(array_unique(array_filter(array_map('intval',(array)($content['documents']??[])),static fn($id)=>$id>0))),
+        'listed_documents'=>array_values(array_unique(array_filter(array_map('intval',(array)($content['listed_documents']??[])),static fn($id)=>$id>0))),
         'newsletters'=>array_values(array_unique(array_filter(array_map('intval',(array)($content['newsletters']??[])),static fn($id)=>$id>0))),
         'notices'=>array_values(array_slice((array)($content['notices']??[]),0,10)),
         'qa'=>array_values(array_slice((array)($content['qa']??[]),0,100)),
@@ -29,6 +33,7 @@ function residentPortalSaveContent(array $content): void {
             return ['question'=>mb_substr(trim((string)($item['question']??'')),0,500),'answer'=>mb_substr(trim((string)($item['answer']??'')),0,4000),'document_id'=>max(0,(int)($item['document_id']??0)),'active'=>!empty($item['active'])];
         },$safe[$group]),static fn($item)=>$group==='notices'?($item['title']!==''&&$item['body']!==''):($item['question']!==''&&$item['answer']!=='')));
     }
+    $safe['listed_documents']=array_values(array_intersect($safe['listed_documents'],$safe['documents']));
     $safe['newsletters']=array_values(array_intersect($safe['newsletters'],$safe['documents']));
     $source="<?php\ndeclare(strict_types=1);\n// Beheerd via het bewonersportaal; uitsluitend expliciet vrijgegeven documenten zijn openbaar.\nreturn ".var_export($safe,true).";\n";
     $temporary=$path.'.tmp-'.bin2hex(random_bytes(6));

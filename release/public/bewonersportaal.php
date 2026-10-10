@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once __DIR__.'/auth.php';
 require_once __DIR__.'/resident_portal_lib.php';
 header('X-Content-Type-Options: nosniff');header('Referrer-Policy: strict-origin-when-cross-origin');header('Cache-Control: no-store');
-$content=residentPortalContent();$pdo=residentPortalDb();$documents=residentPortalDocuments($pdo,(array)$content['documents']);
+$content=residentPortalContent();$pdo=residentPortalDb();$documents=residentPortalDocuments($pdo,(array)($content['listed_documents']??[]));
 $visibleIds=array_map(static fn($d)=>(int)$d['DocumentID'],$documents);$newsletterIds=array_map('intval',(array)$content['newsletters']);
 $newsletters=array_values(array_filter($documents,static fn($d)=>in_array((int)$d['DocumentID'],$newsletterIds,true)));
 usort($newsletters,static fn($a,$b)=>strcmp((string)($b['Documentdatum']??''),(string)($a['Documentdatum']??'')));
