@@ -71,9 +71,9 @@ onderwerp, locatie en urgentie zijn aanpasbaar via
 **Instellingen → Dropdowns → Bewonersportaal**.
 
 Bewoners kunnen zonder account een probleem, vraag of klacht indienen. De melding
-wordt per e-mail naar `[verwijderd]` verstuurd; daarvoor moet een actief
-SMTP-account zijn ingesteld. Urgentiekeuze helpt het bestuur de melding te
-beoordelen en vervangt geen contact met 112 of het storingsnummer. Externe
+wordt verstuurd naar het meldingsadres dat de beheerder voor de installatie heeft
+ingesteld; daarvoor moet een actief SMTP-account zijn ingesteld. Urgentiekeuze
+helpt het bestuur de melding te beoordelen en vervangt geen contact met 112 of het storingsnummer. Externe
 AI-antwoorden zijn optioneel en staan standaard uit. Als de beheerder ze
 inschakelt, worden de vraag en relevante passages uit vrijgegeven documenten
 naar de ingestelde AI-provider gestuurd.
